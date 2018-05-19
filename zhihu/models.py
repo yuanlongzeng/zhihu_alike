@@ -66,8 +66,8 @@ class Question(models.Model):
     topics = models.ManyToManyField("Topic",blank=True,related_name="topics",verbose_name="话题")
     content = models.TextField()
     clicks = models.IntegerField()
-    created_date = models.DateTimeField(default=datetime.now)
-    recent_modify_date = models.DateTimeField(default=datetime.now)
+    created_date = models.DateTimeField(default=datetime.now,verbose_name="创建时间")
+    recent_modify_date = models.DateTimeField(default=datetime.now,verbose_name="修改时间")
     comment = models.ManyToManyField(Comment)
     #answer = models.ForeignKey("Answer")  #应该是由问题得到答案的多---但是问题应该只存一份即可  要是放这就得每一个回答就得新建一个问题 --冗余  而放在回答中就只需要存问题的id就可以
     status = models.BooleanField(default=False, verbose_name="有效标志")
