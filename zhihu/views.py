@@ -15,7 +15,13 @@ from .forms import LoginForm
 
 class Index(View):
     def get(self,request):
-        return render(request,"index.html",context={"request":request})
+        if not request.user.is_authenticated():
+            return HttpResponseRedirect(reverse("login"))
+        #取用户的关注列表、话题等 然后根据用户活跃度使用推还是拉模式
+        #还得有分页设置--最好使用drf来完成
+
+        data = {"username":"xx","type":"热门回答","comment_num":99,"topic":"电动力学",'desc':"too science","content":"电动力学的推荐书是两本：1、Griffiths《Introduction to Electrodynamics》。Griffiths的教材都很经典，这本也不例外。讲得很清楚，也很容易入手。不过国内的学生读起来可能会感觉过于简单，其实大部分内容很接近一般普物电磁学教材的难度，但是数学更严格"}
+        return render(request,"index.html",context={"request":request,"data":data})
 #自定义用户登录验证
 class CustomAuth(ModelBackend):  # 自定义用户登录验证查询
     def authenticate(self, username=None, password=None, **kwargs):
