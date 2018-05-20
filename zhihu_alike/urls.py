@@ -18,7 +18,7 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from django.views.static import serve
 
-from zhihu.views import Index,Login
+from zhihu.views import Index,Login,Logout
 import xadmin
 urlpatterns = [
    # url(r'^admin/', admin.site.urls),
@@ -30,6 +30,7 @@ urlpatterns = [
     #自定义视图
     url(r'^$',Index.as_view(),name="index"),
     url(r'^login/$',Login.as_view(),name="login"),
+    url(r'^logout/$',Logout.as_view(),name="logout"),
 
     url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),  # 静态文件加载，media文件
 ]

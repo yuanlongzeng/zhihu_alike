@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
 from django.http import HttpResponseRedirect
@@ -48,4 +48,9 @@ class Login(View):
                 return render(request, "login.html", {"msg": "用户名或密码错误,请重试", "login_form": login_form})
         else:
             return render(request, "login.html", {"login_form": login_form})
+
+class Logout(View):
+    def get(self, request):
+        logout(request)
+        return HttpResponseRedirect(reverse("index"))
 
