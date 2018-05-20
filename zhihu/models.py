@@ -19,6 +19,7 @@ class UserProfile(AbstractUser):
     status = models.BooleanField(default=False,verbose_name="有效标志")#用于注册激活
     #尽量正向查询，否则会做不必要的查询  所以这些关系filed应放在查询比较多的表上
 
+   #当定义模型通过中间模型与其自身产生的多对多关系时，你必须使用参数symmetrical=False
     followings = models.ManyToManyField('self', related_name='funs', symmetrical=False,blank=True,null=True, verbose_name='关注')
     vote_answers = models.ManyToManyField("Answer", related_name='vote_user', blank=True,null=True, verbose_name='点赞答案')
     unvote_answers = models.ManyToManyField("Answer", related_name='unvote_user', blank=True,null=True, verbose_name='反对答案')
