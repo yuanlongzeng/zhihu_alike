@@ -13,28 +13,33 @@ class UserProfile(AbstractUser):
     desc = models.CharField(max_length=200,verbose_name="简介")
     email = models.EmailField(max_length=64, unique=True, verbose_name='邮箱')
     mobile = models.CharField(max_length=11,unique=True,verbose_name="手机号")
-    photo = models.CharField(max_length=100,unique=True,verbose_name="头像")  #头像路径
+    photo = models.ImageField(upload_to="media/%Y/%m/%d/",verbose_name="头像")  #头像路径
     user_type = models.CharField(max_length=10,choices=(("gr","个人"),("org","机构")),default="gr")  #机构需审核
     user_status = models.CharField(max_length=10,choices=(("normal","正常"),("stop","停用"),("delete","删除")))  #用户状态
     status = models.BooleanField(default=False,verbose_name="有效标志")#用于注册激活
     #尽量正向查询，否则会做不必要的查询  所以这些关系filed应放在查询比较多的表上
 
-    followings = models.ManyToManyField('self', related_name='funs', symmetrical=False, verbose_name='关注')
-    vote_answers = models.ManyToManyField("Answer", related_name='vote_user', blank=True, verbose_name='点赞答案')
-    unvote_answers = models.ManyToManyField("Answer", related_name='unvote_user', blank=True, verbose_name='反对答案')
-    collections = models.ManyToManyField("Answer", related_name='collection_user', blank=True, verbose_name='收藏')  #不知回答-，文章等
-    follow_questions = models.ManyToManyField("Question", related_name='followers', blank=True, verbose_name='关注问题')
+    followings = models.ManyToManyField('self', related_name='funs', symmetrical=False,blank=True,null=True, verbose_name='关注')
+    vote_answers = models.ManyToManyField("Answer", related_name='vote_user', blank=True,null=True, verbose_name='点赞答案')
+    unvote_answers = models.ManyToManyField("Answer", related_name='unvote_user', blank=True,null=True, verbose_name='反对答案')
+    collections = models.ManyToManyField("Answer", related_name='collection_user', blank=True,null=True, verbose_name='收藏')  #不知回答-，文章等
+    follow_questions = models.ManyToManyField("Question", related_name='followers', blank=True,null=True, verbose_name='关注问题')
+
 
     def __str__(self):
         return self.nick_name
 
 
 class Message(models.Model):
-    fromid = models.IntegerField()
-    toid = models.IntegerField()
+    fromid = models.ForeignKey(UserProfile,related_name="from_user")
+    toid = models.ForeignKey(UserProfile,related_name="to_user")
     content = models.TextField()
     created_date = models.DateTimeField(default=datetime.now)
-    status = models.BooleanField(default=False, verbose_name="有效标志")
+    status = models.BooleanField(default=True, verbose_name="有效标志")
+
+    class Meta:
+        verbose_name = "私信"
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return self.created_date
@@ -49,10 +54,14 @@ class Comment(models.Model):
     content_object = GenericForeignKey('content_type', 'object_id')  #创建时 chaunru content_obj = answer或者article实例即可自动关联
 
     created_date = models.DateTimeField(default=datetime.now)
-    status = models.BooleanField(default=False, verbose_name="有效标志")
+    status = models.BooleanField(default=True, verbose_name="有效标志")
     #可能有回复别人的评论  没有就是为空  否则就为那个评论的id
     reply_to = models.ForeignKey('self', related_name='replies',
                                  blank=True, null=True, on_delete=models.CASCADE, verbose_name='回复')
+
+    class Meta:
+        verbose_name = "评论"
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return self.content[:10]
@@ -70,7 +79,11 @@ class Question(models.Model):
     recent_modify_date = models.DateTimeField(default=datetime.now,verbose_name="修改时间")
     comment = models.ManyToManyField(Comment)
     #answer = models.ForeignKey("Answer")  #应该是由问题得到答案的多---但是问题应该只存一份即可  要是放这就得每一个回答就得新建一个问题 --冗余  而放在回答中就只需要存问题的id就可以
-    status = models.BooleanField(default=False, verbose_name="有效标志")
+    status = models.BooleanField(default=True, verbose_name="有效标志")
+
+    class Meta:
+        verbose_name = "提问"
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return self.title
@@ -92,8 +105,12 @@ class Topic(models.Model): #toppic应该可以自由拓展
     name = models.CharField(max_length=50,unique=True)
     desc = models.CharField(max_length=100)
     parent = models.ForeignKey('self', blank=True, null=True)  #自引用，一定要允许为空，第一级是没有父话题的
-    status = models.BooleanField(default=False, verbose_name="有效标志")
+    status = models.BooleanField(default=True, verbose_name="有效标志")
     created_date = models.DateTimeField(default=datetime.now)
+
+    class Meta:
+        verbose_name = "话题"
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return self.name
@@ -108,9 +125,13 @@ class Answer(models.Model):
     votesup = models.IntegerField(verbose_name="赞同")
     unvotes = models.IntegerField(verbose_name="反对")
     question = models.ForeignKey("Question")
-    status = models.BooleanField(default=False, verbose_name="有效标志")
+    status = models.BooleanField(default=True, verbose_name="有效标志")
     # 仅用于反向查找
     conmment_list = GenericRelation("Comment")
+
+    class Meta:
+        verbose_name = "回答"
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return self.content[:10]
@@ -139,6 +160,14 @@ class Article(models.Model):
     created_date = models.DateTimeField(default=datetime.now)
     recent_modify_date = models.DateTimeField(default=datetime.now)
     conmment_list = GenericRelation("Comment")
+    status = models.BooleanField(default=True, verbose_name="有效标志")
+
+    class Meta:
+        verbose_name = "文章"
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.title
 
 #专栏
 class Column(models.Model):
@@ -147,6 +176,14 @@ class Column(models.Model):
     desc = models.CharField(max_length=200)
     created_date = models.DateTimeField(default=datetime.now)
     recent_modify_date = models.DateTimeField(default=datetime.now)
+    status = models.BooleanField(default=True, verbose_name="有效标志")
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "专栏"
+        verbose_name_plural = verbose_name
 
 
 #知乎live
