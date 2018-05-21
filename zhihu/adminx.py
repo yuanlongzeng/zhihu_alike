@@ -17,14 +17,14 @@ class AnswerAdmin(object):
     list_filter = ['user', 'content', 'created_date', 'recent_modify_date', 'votesup', 'unvotes','question', 'status']
 
 class MessageAdmin(object):
-    list_display = ['fromid', 'toid', 'content','created_date', 'status']
-    search_fields = ['fromid', 'toid', 'content','created_date', 'status']
-    list_filter = ['fromid', 'toid', 'content','created_date', 'status']
+    list_display = ['fromid', 'content','created_date', 'status']
+    search_fields = ['fromid', 'content','created_date', 'status']
+    list_filter = ['fromid',  'content','created_date', 'status']
 
 class CommentAdmin(object):
-    list_display = ['user', 'toid', 'content','content_type', 'object_id','created_date', 'status',"reply_to"]
-    search_fields = ['user', 'toid', 'content','content_type', 'object_id','created_date', 'status',"reply_to"]
-    list_filter = ['user', 'toid', 'content','content_type', 'object_id','created_date', 'status',"reply_to"]
+    list_display = ['user',  'content','content_type', 'object_id','created_date', 'status',"reply_to"]
+    search_fields = ['user', 'content','content_type', 'object_id','created_date', 'status',"reply_to"]
+    list_filter = ['user',  'content','content_type', 'object_id','created_date', 'status',"reply_to"]
 
 
 class TopicAdmin(object):
