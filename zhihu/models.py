@@ -32,10 +32,10 @@ class UserProfile(AbstractUser):
 
 
 class Message(models.Model):
-    fromid = models.ForeignKey(UserProfile,related_name="from_user")
-    toid = models.ForeignKey(UserProfile,related_name="to_user")
-    content = models.TextField()
-    created_date = models.DateTimeField(default=datetime.now)
+    fromid = models.ForeignKey(UserProfile,related_name="from_user",verbose_name="发送者")
+    toid = models.ForeignKey(UserProfile,related_name="to_user",verbose_name="接受者")
+    content = models.TextField(verbose_name="内容")
+    created_date = models.DateTimeField(default=datetime.now,verbose_name="创建时间")
     status = models.BooleanField(default=True, verbose_name="有效标志")
 
     class Meta:
@@ -49,12 +49,13 @@ class Comment(models.Model):
     content = models.TextField()
     use = models.ForeignKey(UserProfile,verbose_name="作者")
     #可能是回答或者文章 ----使用contenttype
+    #怎么自动关联的？
     content_type = models.ForeignKey(ContentType, verbose_name='关联的表名称')  # 7,8 表名称
     object_id = models.IntegerField(verbose_name='关联的表中的数据行的ID')  #
     # 帮助你快速实现content_type操作--查找相应id及model（表名）
     content_object = GenericForeignKey('content_type', 'object_id')  #创建时 chaunru content_obj = answer或者article实例即可自动关联
 
-    created_date = models.DateTimeField(default=datetime.now)
+    created_date = models.DateTimeField(default=datetime.now,verbose_name="创建时间")
     status = models.BooleanField(default=True, verbose_name="有效标志")
     #可能有回复别人的评论  没有就是为空  否则就为那个评论的id
     reply_to = models.ForeignKey('self', related_name='replies',
@@ -72,13 +73,14 @@ class Question(models.Model):
     #可以追溯所有的修改者
     creator = models.OneToOneField(UserProfile,related_name="creator",verbose_name="提问者")  #停用、拉黑--删除
     editor = models.ForeignKey(UserProfile,related_name="edior",verbose_name="编辑者")  #反向查询：不能同时使用默认的表名  默认名是userprofile_set
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=100,verbose_name="标题")
     topics = models.ManyToManyField("Topic",blank=True,related_name="topics",verbose_name="话题")
-    content = models.TextField()
-    clicks = models.IntegerField()
+    content = models.TextField(verbose_name="内容")
+    clicks = models.IntegerField(default=0,verbose_name="点击数")
     created_date = models.DateTimeField(default=datetime.now,verbose_name="创建时间")
     recent_modify_date = models.DateTimeField(default=datetime.now,verbose_name="修改时间")
-    comment = models.ManyToManyField(Comment)
+
+    comment = models.ManyToManyField(Comment,blank=True,null=True,verbose_name="评论")
     #answer = models.ForeignKey("Answer")  #应该是由问题得到答案的多---但是问题应该只存一份即可  要是放这就得每一个回答就得新建一个问题 --冗余  而放在回答中就只需要存问题的id就可以
     status = models.BooleanField(default=True, verbose_name="有效标志")
 
@@ -103,11 +105,11 @@ class Question(models.Model):
         self.save()
 
 class Topic(models.Model): #toppic应该可以自由拓展
-    name = models.CharField(max_length=50,unique=True)
-    desc = models.CharField(max_length=100)
-    parent = models.ForeignKey('self', blank=True, null=True)  #自引用，一定要允许为空，第一级是没有父话题的
+    name = models.CharField(max_length=50,unique=True,verbose_name="话题名称")
+    desc = models.CharField(max_length=100,verbose_name="描述")
+    parent = models.ForeignKey('self', blank=True, null=True,verbose_name="父话题")  #自引用，一定要允许为空，第一级是没有父话题的
     status = models.BooleanField(default=True, verbose_name="有效标志")
-    created_date = models.DateTimeField(default=datetime.now)
+    created_date = models.DateTimeField(default=datetime.now,verbose_name="创建时间")
 
     class Meta:
         verbose_name = "话题"
@@ -121,14 +123,14 @@ class Topic(models.Model): #toppic应该可以自由拓展
 class Answer(models.Model):
     user = models.ForeignKey(UserProfile)
     content = models.TextField()
-    created_date = models.DateTimeField(default=datetime.now)
-    recent_modify_date = models.DateTimeField(default=datetime.now)
-    votesup = models.IntegerField(verbose_name="赞同")
-    unvotes = models.IntegerField(verbose_name="反对")
-    question = models.ForeignKey("Question")
+    created_date = models.DateTimeField(default=datetime.now, verbose_name="创建时间")
+    recent_modify_date = models.DateTimeField(default=datetime.now, verbose_name="修改时间")
+    votesup = models.IntegerField(default=0,verbose_name="赞同")
+    unvotes = models.IntegerField(default=0,verbose_name="反对")
+    question = models.ForeignKey("Question",verbose_name="回答")
     status = models.BooleanField(default=True, verbose_name="有效标志")
     # 仅用于反向查找
-    conmment_list = GenericRelation("Comment")
+    conmment_list = GenericRelation("Comment",verbose_name="评论列表")
 
     class Meta:
         verbose_name = "回答"
@@ -158,9 +160,9 @@ class Article(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()
     column = models.ForeignKey("Column",verbose_name="所属专栏")
-    created_date = models.DateTimeField(default=datetime.now)
-    recent_modify_date = models.DateTimeField(default=datetime.now)
-    conmment_list = GenericRelation("Comment")
+    created_date = models.DateTimeField(default=datetime.now, verbose_name="创建时间")
+    recent_modify_date = models.DateTimeField(default=datetime.now, verbose_name="修改时间")
+    conmment_list = GenericRelation("Comment",blank=True,null=True,verbose_name="评论列表")
     status = models.BooleanField(default=True, verbose_name="有效标志")
 
     class Meta:
@@ -173,10 +175,10 @@ class Article(models.Model):
 #专栏
 class Column(models.Model):
     user = models.ForeignKey(UserProfile,verbose_name="作者")
-    name = models.CharField(max_length=100)
-    desc = models.CharField(max_length=200)
-    created_date = models.DateTimeField(default=datetime.now)
-    recent_modify_date = models.DateTimeField(default=datetime.now)
+    name = models.CharField(max_length=100,verbose_name="专栏名称")
+    desc = models.CharField(max_length=200,verbose_name="简介")
+    created_date = models.DateTimeField(default=datetime.now, verbose_name="创建时间")
+    recent_modify_date = models.DateTimeField(default=datetime.now, verbose_name="修改时间")
     status = models.BooleanField(default=True, verbose_name="有效标志")
 
     def __str__(self):
