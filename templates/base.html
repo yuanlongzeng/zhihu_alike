@@ -1,0 +1,217 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link href="{% static 'css/zui.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/bootstrap-tagsinput.css' %}" rel="stylesheet">
+    <link href="{% static 'css/share.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/mystyle.css' %}"  rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="{% static 'images/favicon.ico' %}">
+<style>
+    .bootstrap-tagsinput>input {
+        width: 100%;
+    }
+</style>
+    {% block css %}{% endblock %}
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/zui.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap-tagsinput.min.js' %}"></script>
+    <script src="{% static 'js/fetch.min.js' %}"></script>
+    <script src="{% static 'js/social-share.min.js' %}"></script>
+    <script src="{% static 'js/myfunc.js' %}"></script>
+
+</head>
+<body>
+<nav class="navbar navbar-fixed-top" role="navigation" style="background-color: white; font-size: 14px; min-width: 1024px;">
+    <div class="container-fulid">
+        <div class="row">
+            <div class="col-xs-1"></div>
+            <div class="col-xs-10 ">
+
+                <div class="navbar-header">
+
+                    <button type="button" class="navbar-toggle" data-toggle="collapse"
+                            data-target=".navbar-collapse-example">
+                        <span class="sr-only">切换导航</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+
+                    <a class="navbar-brand" href="{% url 'index' %}" style="font-size: 30px; color: #0084ff">知乎</a>
+                </div>
+                <div class="collapse navbar-collapse navbar-collapse-example">
+                    <ul class="nav navbar-nav">
+                        <li><a href="/">首页</a></li>
+                        <li><a href="{% url 'explore' %}">发现</a></li>
+                        <li><a href="{% url 'topics:index' %}">话题</a></li>
+
+                    </ul>
+                    <form action="{% url 'search' %}" class="navbar-form navbar-left" role="search">
+                        <div class="form-group">
+                            <input name="s" type="text" class="form-control" placeholder="搜索">
+                        </div>
+                        <button type="submit" class="btn btn-default">搜索</button>
+                    </form>
+                    {% if user.is_authenticated %}
+                       <button class="Button Button-blue nav-btn" type="button" style="margin-top: 3px" data-toggle="modal" data-target="#askModal">提问</button>
+                    {% else %}
+                        <button class="Button Button-blue nav-btn" type="button" style="margin-top: 3px" data-toggle="modal" data-target="#loginModal" >提问</button>
+                    {% endif %}
+
+                    <ul class="nav navbar-nav navbar-right">
+                        {% if user.is_authenticated %}
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding: 5px">
+                                    <img src="{{ user.get_image_url }}" class="img-rounded" width="30" height="30"></a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a href="{% url 'users:answers' user.id %}">我的主页</a></li>
+                                    <li><a href="{% url 'users:setting' %}">设置</a></li>
+                                    <li><a href="{% url 'logout' %}">退出</a></li>
+                                </ul>
+                            </li>
+                        {% else %}
+                            <li style="margin-top: 3px">
+                                <button class="Button Button-white nav-btn" type="button" data-toggle="modal" data-target="#loginModal">登录</button>
+                            </li>
+                            <li style="margin-top: 3px">
+                                <button class="Button Button-blue nav-btn" type="button" data-toggle="modal" data-target="#registerModal">加入知乎</button>
+                            </li>
+                            </ul>
+                        {% endif %}
+                </div><!-- END .navbar-collapse -->
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- 对话框HTML -->
+<div class="modal fade" id="askModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="login-header">
+                <h1 style="color: black">写下你的问题</h1>
+                <p style="color: #8590a6">描述精确的问题更易得到解答</p>
+            </div>
+            <div class="login-content">
+                <form action="{% url 'asks:post_ask' %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-group login-input-control">
+                        <textarea name="title" class="form-control" placeholder="问题标题" required></textarea>
+                    </div>
+                    <div class="form-group login-input-control">
+                        <input type="text" name="topics_list" class="form-control taginput" placeholder="添加话题" data-role="tagsinput">
+                    </div>
+                    <div class="form-group login-input-control">
+                        <label>问题描述(可选)：</label>
+                        <textarea name="content" class="form-control" placeholder="问题描述"></textarea>
+                    </div>
+                    <button type="submit" class="Button Button-blue" style="width: 310px;">提交问题</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 对话框HTML -->
+<div class="modal fade" id="loginModal">
+    <div class="modal-dialog" style="width: 420px">
+        <div class="modal-content">
+            <div class="login-header">
+                <p style="font-size: 45px; margin-bottom: 40px">知乎</p>
+                <h1 style="font-weight: 400">登录知乎，发现更大的世界</h1>
+            </div>
+            <div class="login-content">
+                <form id="login-form">
+                    {% csrf_token %}
+                    <div id="login-username-input" class="form-group login-input-control">
+                        <input type="text" name="username" class="form-control" placeholder="用户名" required>
+                    </div>
+                    <div id="login-password-input" class="form-group login-input-control">
+                        <input type="password" name="password" class="form-control" placeholder="密码" required>
+                        <div id="login-message" class="help-block"></div>
+                    </div>
+
+                    <button type="submit" class="Button Button-blue" onclick="login();return false" style="width: 310px;">登录</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 对话框HTML -->
+<div class="modal fade" id="registerModal">
+    <div class="modal-dialog" style="width: 420px">
+        <div class="modal-content">
+            <div class="login-header">
+                <p style="font-size: 45px; margin-bottom: 40px">知乎</p>
+                <h1 style="font-weight: 400">登录知乎，发现更大的世界</h1>
+            </div>
+            <div class="login-content">
+                <form id="register-form">
+                    {% csrf_token %}
+                    <div id="register-input-1" class="form-group login-input-control">
+                        <input type="text" name="username" class="form-control" placeholder="用户名" required>
+                        <div id="register-message-1" class="help-block"></div>
+                    </div>
+                    <div id="register-input-2" class="form-group login-input-control">
+                        <input type="email" name="email" class="form-control" placeholder="邮箱" required>
+                        <div id="register-message-2" class="help-block"></div>
+                    </div>
+                    <div id="register-input-3" class="form-group login-input-control">
+                        <input type="text" name="nickname" class="form-control" placeholder="昵称" required>
+                        <div id="register-message-3" class="help-block"></div>
+                    </div>
+                    <div id="register-input-4" class="form-group login-input-control">
+                        <input type="password" name="password1" class="form-control" placeholder="密码" required>
+                        <div id="register-message-4" class="help-block"></div>
+                    </div>
+                    <div id="register-input-5" class="form-group login-input-control">
+                        <input type="password" name="password2" class="form-control" placeholder="重复密码" required>
+                        <div id="register-message-5" class="help-block"></div>
+                    </div>
+                    <button type="submit" class="Button Button-blue" onclick="register();return false" style="width: 310px;">注册</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div style="margin-top: 45px">{% block content %}
+    {% block header %}{% endblock %}
+    <div class="container-fulid">
+        <div class="row">
+            <div class="col-xs-2"></div>
+            <div class="col-xs-8">
+                <div class="row">
+                    <div class="col-xs-8">{% block main %}{% endblock %}</div>
+                    <div class="col-xs-4">{% block sidebar %}{% endblock %}
+                    <footer style="line-height: 26px">
+                        <a>刘看山</a><span> · </span><a>知乎指南</a><span> · </span><a>知乎协议</a><span> · </span><a>隐私政策</a><br>
+                        <a>应用</a><span> · </span><a>工作</a><span> · </span><a>申请开通知乎机构号</a><br>
+                        <a>侵权举报</a><span> · </span><a>网上有害信息举报专区</a><br>
+                        <a>违法和不良信息举报: 010-82716601</a><br>
+                        <a>儿童色情信息举报专区</a><br>
+                        <a>联系我们 © 2018 知乎</a><br>
+                    </footer>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}</div>
+<script>
+    $(document).ready(function () {
+        $('.bootstrap-tagsinput').attr('style', 'width: 100%');
+        $('.taginput').tagsinput({
+            maxTags: 5
+        });
+    });
+
+</script>
+{% block script %}{% endblock %}
+</body>
+</html>

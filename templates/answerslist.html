@@ -1,0 +1,6 @@
+{% for answer in answers %}
+   {% include "answer_block.html" %}
+{% endfor %}
+{% if answers.has_next %}
+    <button class="Button Button-white get-more" onclick="answersMore(this, {{ answers.next_page_number }})">更多</button>
+{% endif %}
