@@ -19,7 +19,7 @@ class BaseSetting:
 
 
 class GlobalSetting:
-    site_title = "XX社交只是分享网站"  # 设置主题
+    site_title = "XX社交知识分享网站"  # 设置主题
     site_footer = "xx social website for knowledge"
     menu_style = "accordion"  #每个app下的model可展开-收缩
 

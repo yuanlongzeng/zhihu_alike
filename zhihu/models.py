@@ -7,15 +7,16 @@ from django.contrib.contenttypes.models import ContentType
 # Create your models here.
 
 class UserProfile(AbstractUser):
-    #user = models.OneToOneField(User)  #is_active  username  email   pwd
+    #user = models.OneToOneField(User)  #is_active  username  email   pwd  课程--课程详情可以使用OneToOneField【ForeignKey:-章--节】
     nick_name = models.CharField(max_length=50,blank=False,null=False,unique=True,verbose_name="昵称")
+    # 这种不需要使用CharField  可以节省空间   但是可能直接看数据库的话就会不直观
     gender = models.CharField(max_length=2,choices=(("F","女"),("M","男")),default="M",verbose_name="性别")
     desc = models.CharField(max_length=200,verbose_name="简介")
     email = models.EmailField(max_length=64, unique=True, verbose_name='邮箱')
     mobile = models.CharField(max_length=11,unique=True,verbose_name="手机号")
     photo = models.ImageField(upload_to="media/%Y/%m/%d/",verbose_name="头像")  #头像路径
-    user_type = models.CharField(max_length=10,choices=(("gr","个人"),("org","机构")),default="gr")  #机构需审核
-    user_status = models.CharField(max_length=10,choices=(("normal","正常"),("stop","停用"),("delete","删除")))  #用户状态
+    user_type = models.CharField(max_length=10,choices=(("gr","个人"),("org","机构")),default="gr",verbose_name="类别")  #机构需审核
+    user_status = models.CharField(max_length=10,choices=(("normal","正常"),("stop","停用"),("delete","删除")),verbose_name="用户状态")  #用户状态
     status = models.BooleanField(default=False,verbose_name="有效标志")#用于注册激活
     #尽量正向查询，否则会做不必要的查询  所以这些关系filed应放在查询比较多的表上
 
@@ -47,9 +48,8 @@ class Message(models.Model):
 
 class Comment(models.Model):
     content = models.TextField()
-    use = models.ForeignKey(UserProfile,verbose_name="作者")
-    #可能是回答或者文章 ----使用contenttype
-    #怎么自动关联的？
+    user = models.ForeignKey(UserProfile,verbose_name="作者")
+    #可能是回答或者文章 ----使用contenttype 自动关联
     content_type = models.ForeignKey(ContentType, verbose_name='关联的表名称')  # 7,8 表名称
     object_id = models.IntegerField(verbose_name='关联的表中的数据行的ID')  #
     # 帮助你快速实现content_type操作--查找相应id及model（表名）
@@ -59,7 +59,7 @@ class Comment(models.Model):
     status = models.BooleanField(default=True, verbose_name="有效标志")
     #可能有回复别人的评论  没有就是为空  否则就为那个评论的id
     reply_to = models.ForeignKey('self', related_name='replies',
-                                 blank=True, null=True, on_delete=models.CASCADE, verbose_name='回复')
+                                 blank=True, null=True, on_delete=models.CASCADE, verbose_name='回复',help_text="单独回复某答案或文章则为空，表示在下面回复某人的评论")
 
     class Meta:
         verbose_name = "评论"
