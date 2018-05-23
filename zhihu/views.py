@@ -33,7 +33,9 @@ class CustomAuth(ModelBackend):  # 自定义用户登录验证查询
             return None
 class Login(View):
     def get(self,request):
-        return render(request,"login.html",context={})
+        if not request.user.is_authenticated:
+            return render(request,"login.html",context={})
+        return HttpResponseRedirect(reverse("index"))
 
     def post(self,request):
         login_form= LoginForm(request.POST)

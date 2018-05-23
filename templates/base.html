@@ -46,11 +46,11 @@
                 <div class="collapse navbar-collapse navbar-collapse-example">
                     <ul class="nav navbar-nav">
                         <li><a href="/">首页</a></li>
-                        <li><a href="{% url 'explore' %}">发现</a></li>
-                        <li><a href="{% url 'topics:index' %}">话题</a></li>
+{#                        <li><a href="{% url 'explore' %}">发现</a></li>#}
+{#                        <li><a href="{% url 'topics:index' %}">话题</a></li>#}
 
                     </ul>
-                    <form action="{% url 'search' %}" class="navbar-form navbar-left" role="search">
+                    <form action="/search" class="navbar-form navbar-left" role="search">
                         <div class="form-group">
                             <input name="s" type="text" class="form-control" placeholder="搜索">
                         </div>
@@ -97,7 +97,7 @@
                 <p style="color: #8590a6">描述精确的问题更易得到解答</p>
             </div>
             <div class="login-content">
-                <form action="{% url 'asks:post_ask' %}" method="post">
+                <form action="asks/post_ask" method="post">
                     {% csrf_token %}
                     <div class="form-group login-input-control">
                         <textarea name="title" class="form-control" placeholder="问题标题" required></textarea>
