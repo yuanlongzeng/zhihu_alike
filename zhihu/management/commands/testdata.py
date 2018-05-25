@@ -4,10 +4,10 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from faker import Faker
 
-from ...models import User
-from asks.models import Ask
-from answers.models import Answer
-from comments.models import Comment
+from zhihu.models import UserProfile  #User
+from zhihu.models import Question    #Ask
+from zhihu.models import Answer
+from zhihu.models import Comment
 
 fake = Faker('zh_CN')
 
@@ -24,23 +24,24 @@ class Command(BaseCommand):
             # 生成用户数据
             print('正在生成用户数据...')
             for i in range(50):
-                User.objects.create_user(username=('test'+str(i)),
-                                         nickname=fake.name(),
+                UserProfile.objects.create_user(username=('test'+str(i)),
+                                         nick_name=fake.name(),
                                          password='test1234',
                                          email=fake.free_email(),
-                                         sex=random.choice(['F', 'M']),
-                                         intro=fake.sentence(),
-                                         work=fake.company())
+                                         gender=random.choice(['F', 'M']),
+                                         desc=fake.sentence(),
+                                         mobile=fake.phone_number()
+                                                )
             print('用户数据生成完成！')
 
         if not options['o'] or (options['o'] and 'relationship' in options['o']):
             # 生成关注关系
             print('正在生成用户关系...')
-            user_count = User.objects.count()
+            user_count = UserProfile.objects.count()
             for i in range(user_count):
                 try:
-                    u = User.objects.get(id=i)
-                except User.DoesNotExist:
+                    u = UserProfile.objects.get(id=i)
+                except UserProfile.DoesNotExist:
                     continue
                 follow_limit = random.randint(5, 10)
                 for _ in range(follow_limit):
@@ -50,21 +51,23 @@ class Command(BaseCommand):
         if not options['o'] or (options['o'] and 'ask' in options['o']):
             # 生成问题
             print('正在生成问题...')
-            user_count = User.objects.count()
+            user_count = UserProfile.objects.count()
             topic_list = ['互联网', 'Python', '编程', '游戏', '金融', '信息', '健身', 'NBA', '深圳市',
                           '科技', '芯片', '电脑', '电影', '音乐', '法律', '大学', '中国']
             for i in range(user_count):
                 try:
-                    u = User.objects.get(id=i)
-                except User.DoesNotExist:
+                    u = UserProfile.objects.get(id=i)
+                except UserProfile.DoesNotExist:
                     continue
                 ask_limit = random.randint(1, 10)
                 for _ in range(ask_limit):
                     topics = random.sample(topic_list, random.randint(1, 3))
-                    ask = Ask.objects.create(title=fake.sentence(),
+                    ask = Question.objects.create(title=fake.sentence(),
                                              content=fake.text(),
-                                             author=u,
-                                             create_time=fake.past_datetime(start_date="-2y", tzinfo=tzone),
+                                             creator=u,
+                                            editor=u,
+                                             created_date=fake.past_datetime(start_date="-2y", tzinfo=tzone),
+                                                  recent_modify_date=fake.past_datetime(start_date="-2y", tzinfo=tzone),
                                              )
                     ask.add_topics(topics)
             print('问题生成完成！')
@@ -72,37 +75,36 @@ class Command(BaseCommand):
         if not options['o'] or (options['o'] and 'answer' in options['o']):
             # 生成答案
             print('正在生成答案...')
-            user_count = User.objects.count()
-            ask_count = Ask.objects.count()
+            user_count = UserProfile.objects.count()
+            ask_count = UserProfile.objects.count()
             answer_list = []
             for i in range(user_count):
                 try:
-                    u = User.objects.get(id=i)
-                except User.DoesNotExist:
+                    u = UserProfile.objects.get(id=i)
+                except UserProfile.DoesNotExist:
                     continue
                 ask_limit = random.randint(5, 30)
                 for _ in range(ask_limit):
                     content = fake.text(max_nb_chars=1000)
-                    ask = Ask.objects.get(id=random.randint(1, ask_count))
-                    answer_list.append(Answer(author=u,
-                                              content_text=content,
+                    ask = Question.objects.get(id=random.randint(1, ask_count))
+                    answer_list.append(Answer(user=u,
                                               content=content,
-                                              ask=ask,
-                                              create_time=fake.past_datetime(start_date="-2y", tzinfo=tzone),))
-                Answer.objects.bulk_create(answer_list)
+                                              question=ask,
+                                              ))
+                Answer.objects.bulk_create(answer_list)  #批量创建
                 answer_list = []
             print('答案生成完成！')
 
         if not options['o'] or (options['o'] and 'comment' in options['o']):
             # 生成评论
             print('正在生成评论...')
-            user_count = User.objects.count()
+            user_count = UserProfile.objects.count()
             answer_count = Answer.objects.count()
             comment_list = []
             for i in range(user_count):
                 try:
-                    u = User.objects.get(id=i)
-                except User.DoesNotExist:
+                    u = UserProfile.objects.get(id=i)
+                except UserProfile.DoesNotExist:
                     continue
                 answer_limit = 100
                 for _ in range(answer_limit):
@@ -111,9 +113,10 @@ class Command(BaseCommand):
                     except Answer.DoesNotExist:
                         continue
                     comment_list.append(Comment(content=fake.sentence(),
-                                                author=u,
-                                                answer=answer,
-                                                create_time=fake.past_datetime(start_date="-2y", tzinfo=tzone),))
+                                                user=u,
+                                                content_type="Answer",
+                                                content_id = answer.id,
+                                                ))
                 Comment.objects.bulk_create(comment_list)
                 comment_list = []
             print('评论生成完成！')
@@ -121,14 +124,14 @@ class Command(BaseCommand):
         if not options['o'] or (options['o'] and 'vote' in options['o']):
             # 生成点赞数据
             print('正在点赞...')
-            user_count = User.objects.count()
+            user_count = UserProfile.objects.count()
             answer_count = Answer.objects.count()
             answer_limit = 200
             vote_list = []
             for i in range(user_count):
                 try:
-                    u = User.objects.get(id=i)
-                except User.DoesNotExist:
+                    u = UserProfile.objects.get(id=i)
+                except UserProfile.DoesNotExist:
                     continue
                 answer_list = random.sample(range(answer_count), answer_limit)
                 for answer_id in answer_list:
@@ -147,13 +150,13 @@ class Command(BaseCommand):
         if not options['o'] or (options['o'] and 'collection' in options['o']):
             # 生成点赞数据
             print('正在收藏...')
-            user_count = User.objects.count()
+            user_count = UserProfile.objects.count()
             answer_count = Answer.objects.count()
             collection_list = []
             for i in range(user_count):
                 try:
-                    u = User.objects.get(id=i)
-                except User.DoesNotExist:
+                    u = UserProfile.objects.get(id=i)
+                except UserProfile.DoesNotExist:
                     continue
                 answer_list = random.sample(range(answer_count), random.randint(5, 30))
                 for answer_id in answer_list:

@@ -14,9 +14,9 @@ class UserProfile(AbstractUser):
     desc = models.CharField(max_length=200,verbose_name="简介")
     email = models.EmailField(max_length=64, unique=True, verbose_name='邮箱')
     mobile = models.CharField(max_length=11,unique=True,verbose_name="手机号")
-    photo = models.ImageField(upload_to="media/%Y/%m/%d/",verbose_name="头像")  #头像路径
+    photo = models.ImageField(upload_to="media/%Y/%m/%d/",verbose_name="头像",default="media/1.jpg")  #头像路径
     user_type = models.CharField(max_length=10,choices=(("gr","个人"),("org","机构")),default="gr",verbose_name="类别")  #机构需审核
-    user_status = models.CharField(max_length=10,choices=(("normal","正常"),("stop","停用"),("delete","删除")),verbose_name="用户状态")  #用户状态
+    user_status = models.CharField(max_length=10,choices=(("normal","正常"),("stop","停用"),("delete","删除")),verbose_name="用户状态",default="normal")  #用户状态
     status = models.BooleanField(default=False,verbose_name="有效标志")#用于注册激活
     #尽量正向查询，否则会做不必要的查询  所以这些关系filed应放在查询比较多的表上
 
@@ -30,6 +30,73 @@ class UserProfile(AbstractUser):
 
     def __str__(self):
         return self.nick_name
+
+    def voteup(self, answer):
+        if self.is_voted(answer):
+            return False
+        self.vote_answers.add(answer)
+        answer.voteup()
+        return True
+
+    def votedown(self, answer):
+        if not self.is_voted(answer):
+            return False
+        self.vote_answers.remove(answer)
+        answer.votedown()
+        return True
+
+    def is_voted(self, answer):
+        return self.vote_answers.filter(id=answer.id).exists()
+    #收藏相关
+    def collect(self, answer):
+        if self.is_collected(answer):
+            return False
+        self.collections.add(answer)
+        return True
+
+    def uncollect(self, answer):
+        if not self.is_collected(answer):
+            return False
+        self.collections.add(answer)
+        return True
+
+    def is_collected(self, answer):
+        return self.collections.filter(id=answer.id).exists()
+
+    def follow(self, user_id):
+        try:
+            follow_user = UserProfile.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return False
+        if self.id != follow_user.id and not self.is_following(follow_user):
+            self.followings.add(follow_user)
+            return True
+
+    def unfollow(self, user_id):
+        try:
+            follow_user = UserProfile.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return False
+        if self.is_following(follow_user):
+            self.followings.remove(follow_user)
+            return True
+    def is_following(self, user):
+        return self.followings.filter(id=user.id).exists()
+
+    def follow_ask(self, ask):
+        if self.is_follow_ask(ask):
+            return False
+        self.follow_asks.add(ask)
+        return True
+
+    def unfollow_ask(self, ask):
+        if not self.is_follow_ask(ask):
+            return False
+        self.follow_asks.remove(ask)
+        return True
+
+    def is_follow_ask(self, ask):
+        return self.follow_asks.filter(id=ask.id).exists()
 
 
 class Message(models.Model):
@@ -96,7 +163,7 @@ class Question(models.Model):
             try:
                 topic = Topic.objects.get(name=t_name)
             except Topic.DoesNotExist:
-                topic = Topic(name=t_name)
+                topic = Topic(name=t_name,desc=t_name)
                 topic.save()
             self.topics.add(topic)  #这样就可以自动添加关系
 
@@ -147,13 +214,6 @@ class Answer(models.Model):
         self.votesup -= 1
         self.save()
 
-    def unvote(self):
-        self.unvotes +=1
-        self.save()
-
-    def cancel_unvote(self):
-        self.unvotes -=1
-        self.save()
 
 class Article(models.Model):
     user = models.ForeignKey(UserProfile,verbose_name="作者") #可能会有很多  暂时先只能有一个
