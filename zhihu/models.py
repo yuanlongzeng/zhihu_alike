@@ -119,9 +119,9 @@ class Comment(models.Model):
     content = models.TextField()
     user = models.ForeignKey(UserProfile,verbose_name="作者")
     #可能是回答或者文章 ----使用contenttype 自动关联
-    content_type = models.ForeignKey(ContentType, verbose_name='关联的表名称')  # 7,8 表名称
-    object_id = models.IntegerField(verbose_name='关联的表中的数据行的ID')  #
-    # 帮助你快速实现content_type操作--查找相应id及model（表名）
+    content_type = models.ForeignKey(ContentType, verbose_name='关联的表名称',blank=True,null=True)  # 7,8 表名称
+    object_id = models.IntegerField(verbose_name='关联的表中的数据行的ID',blank=True,null=True)  #
+    # 帮助你快速实现content_type操作--查找相应id及model（表名）  不会生成该列
     content_object = GenericForeignKey('content_type', 'object_id')  #创建时 chaunru content_obj = answer或者article实例即可自动关联
 
     created_date = models.DateTimeField(default=timezone.now,verbose_name="创建时间")

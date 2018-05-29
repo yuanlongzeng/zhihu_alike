@@ -112,10 +112,12 @@ class Command(BaseCommand):
                         answer = Answer.objects.get(id=random.randint(1, answer_count))
                     except Answer.DoesNotExist:
                         continue
+
                     comment_list.append(Comment(content=fake.sentence(),
                                                 user=u,
-                                                content_type="Answer",
-                                                content_id = answer.id,
+                                                # content_type="Answer",
+                                                # content_id = answer.id,
+                                                content_object = answer  #添加数据的方法
                                                 ))
                 Comment.objects.bulk_create(comment_list)
                 comment_list = []
