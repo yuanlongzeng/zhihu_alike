@@ -121,7 +121,7 @@ class Comment(models.Model):
     #可能是回答或者文章 ----使用contenttype 自动关联
     content_type = models.ForeignKey(ContentType, verbose_name='关联的表名称',blank=True,null=True)  # 7,8 表名称
     object_id = models.IntegerField(verbose_name='关联的表中的数据行的ID',blank=True,null=True)  #
-    # 帮助你快速实现content_type操作--查找相应id及model（表名）  不会生成该列
+    # 帮助你快速实现content_type操作--查找相应id及model（表名）  不会生成该列  但是创建数据时传入一个表的实例给该变量即可  上面两个不用传值
     content_object = GenericForeignKey('content_type', 'object_id')  #创建时 chaunru content_obj = answer或者article实例即可自动关联
 
     created_date = models.DateTimeField(default=timezone.now,verbose_name="创建时间")
@@ -196,7 +196,7 @@ class Answer(models.Model):
     recent_modify_date = models.DateTimeField(default=timezone.now, verbose_name="修改时间")
     votesup = models.IntegerField(default=0,verbose_name="赞同")
     unvotes = models.IntegerField(default=0,verbose_name="反对")
-    question = models.ForeignKey("Question",verbose_name="回答")
+    question = models.ForeignKey("Question",verbose_name="回答",related_name="question")
     status = models.BooleanField(default=True, verbose_name="有效标志")
     # 仅用于反向查找
     conmment_list = GenericRelation("Comment",verbose_name="评论列表")

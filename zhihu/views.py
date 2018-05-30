@@ -8,6 +8,14 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views.generic.base import View
 
+from rest_framework.response import Response
+from rest_framework import mixins
+from rest_framework import generics
+from rest_framework import filters
+from rest_framework.pagination import PageNumberPagination
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets
+
 from zhihu.models import UserProfile
 from .forms import LoginForm
 
@@ -22,6 +30,10 @@ class Index(View):
 
         data = {"username":"xx","type":"热门回答","comment_num":99,"topic":"电动力学",'desc':"too science","content":"电动力学的推荐书是两本：1、Griffiths《Introduction to Electrodynamics》。Griffiths的教材都很经典，这本也不例外。讲得很清楚，也很容易入手。不过国内的学生读起来可能会感觉过于简单，其实大部分内容很接近一般普物电磁学教材的难度，但是数学更严格"}
         return render(request,"index.html",context={"request":request,"data":data})
+
+class IndexViewset(viewsets.ModelViewSet):
+    pass
+
 #自定义用户登录验证
 class CustomAuth(ModelBackend):  # 自定义用户登录验证查询
     def authenticate(self, username=None, password=None, **kwargs):
@@ -61,4 +73,39 @@ class Logout(View):
     def get(self, request):
         logout(request)
         return HttpResponseRedirect(reverse("index"))
+
+
+
+############3DRF################
+
+#所有用户可以看到的，未登录时也是跳转到这
+from .models import Answer
+from .serializer import AnswerSerializer
+class AnswerPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    page_query_param = "page"
+    max_page_size = 100
+
+
+class GoodsListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """
+    商品列表页, 分页， 搜索， 过滤， 排序
+    """
+    # throttle_classes = (UserRateThrottle, )
+    queryset = Answer.objects.all()
+    serializer_class = AnswerSerializer
+    pagination_class = AnswerPagination
+    # authentication_classes = (TokenAuthentication, )
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
+    #filter_class = AnswerFilter
+    search_fields = ('name', 'goods_brief', 'goods_desc')
+    ordering_fields = ('sold_num', 'shop_price')
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.click_num += 1
+        instance.save()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
