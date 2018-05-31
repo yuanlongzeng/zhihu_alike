@@ -17,9 +17,12 @@ from django.conf import settings
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.views.static import serve
+from rest_framework.routers import DefaultRouter
 
-from zhihu.views import Index,Login,Logout
+from zhihu.views import Index,Login,Logout,AnswerListViewSet
 import xadmin
+router = DefaultRouter()
+router.register(r'answer', AnswerListViewSet) #, base_name="answer"
 urlpatterns = [
    # url(r'^admin/', admin.site.urls),
 
@@ -33,4 +36,9 @@ urlpatterns = [
     url(r'^logout/$',Logout.as_view(),name="logout"),
 
     url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),  # 静态文件加载，media文件
+
+    #api
+url(r'^', include(router.urls)),
+
+
 ]

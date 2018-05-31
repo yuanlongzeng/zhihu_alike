@@ -88,7 +88,7 @@ class AnswerPagination(PageNumberPagination):
     max_page_size = 100
 
 
-class GoodsListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class AnswerListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """
     商品列表页, 分页， 搜索， 过滤， 排序
     """
@@ -97,15 +97,15 @@ class GoodsListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewset
     serializer_class = AnswerSerializer
     pagination_class = AnswerPagination
     # authentication_classes = (TokenAuthentication, )
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
+    #filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
     #filter_class = AnswerFilter
-    search_fields = ('name', 'goods_brief', 'goods_desc')
-    ordering_fields = ('sold_num', 'shop_price')
+    #search_fields = ('name', 'goods_brief', 'goods_desc')
+    #ordering_fields = ('sold_num', 'shop_price')
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        instance.click_num += 1
-        instance.save()
+        # instance.click_num += 1
+        # instance.save()
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
