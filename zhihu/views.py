@@ -2,21 +2,21 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 # Create your views here.
 from django.urls import reverse
 from django.views.generic.base import View
 
 from rest_framework.response import Response
-from rest_framework import mixins
+from rest_framework import mixins, status
 from rest_framework import generics
 from rest_framework import filters
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 
-from zhihu.models import UserProfile
+from zhihu.models import UserProfile, Comment
 from .forms import LoginForm
 
 
@@ -79,8 +79,8 @@ class Logout(View):
 ############3DRF################
 
 #所有用户可以看到的，未登录时也是跳转到这
-from .models import Answer
-from .serializer import AnswerSerializer
+from .models import Answer,Question
+from .serializer import AnswerSerializer,QuestionSerializer,QuestionCreateSerializer
 class AnswerPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
@@ -90,13 +90,13 @@ class AnswerPagination(PageNumberPagination):
 
 class AnswerListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """
-    商品列表页, 分页， 搜索， 过滤， 排序
+    Answer列表页
     """
     # throttle_classes = (UserRateThrottle, )
     queryset = Answer.objects.all()
     serializer_class = AnswerSerializer
     pagination_class = AnswerPagination
-    # authentication_classes = (TokenAuthentication, )
+    #authentication_classes = (TokenAuthentication, )
     #filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
     #filter_class = AnswerFilter
     #search_fields = ('name', 'goods_brief', 'goods_desc')
@@ -109,3 +109,74 @@ class AnswerListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewse
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
+class QuestionPagination(PageNumberPagination):
+    page_size = 1
+    page_size_query_param = 'page_size'
+    page_query_param = "page"
+    max_page_size = 100
+
+
+class QuestionListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,mixins.CreateModelMixin, viewsets.GenericViewSet):
+    """
+    Answer列表页
+    """
+    # throttle_classes = (UserRateThrottle, )
+    queryset = Question.objects.all()
+    serializer_class = QuestionSerializer
+    pagination_class = QuestionPagination
+    #authentication_classes = (TokenAuthentication, )
+    #filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
+    #filter_class = AnswerFilter
+    #search_fields = ('name', 'goods_brief', 'goods_desc')
+    #ordering_fields = ('sold_num', 'shop_price')
+    def get_serializer_class(self):
+        '''
+        不能共用一个序列化类，depth，信息也要一块传递
+        :return:
+        '''
+        if self.action == "retrieve":
+            return QuestionSerializer
+        elif self.action == "create":
+            return QuestionCreateSerializer
+
+        return QuestionSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        # instance.click_num += 1
+        # instance.save()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        '''
+        {
+"creator":1,
+"editor":1,
+"title": "你的问题？",
+    "content": "具体要问什么",
+    "clicks": 0,
+    "created_date": "2018-05-29T20:57:44.120890+08:00",
+    "recent_modify_date": "2018-05-29T20:57:44.120890+08:00",
+    "status": true,
+    "topics":[1,2]
+}
+        '''
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        #保存数据
+        user = self.perform_create(serializer)
+
+        re_dict = serializer.data
+        # payload = jwt_payload_handler(user)
+        # re_dict["token"] = jwt_encode_handler(payload)
+        #re_dict["name"] = user.name if user.name else user.username
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(re_dict, status=status.HTTP_201_CREATED, headers=headers)
+
+    def get_object(self):
+        return self.request.user
+
+    def perform_create(self, serializer):
+        return serializer.save()

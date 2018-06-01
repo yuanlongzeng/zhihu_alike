@@ -19,10 +19,11 @@ from django.contrib import admin
 from django.views.static import serve
 from rest_framework.routers import DefaultRouter
 
-from zhihu.views import Index,Login,Logout,AnswerListViewSet
+from zhihu.views import Index,Login,Logout,AnswerListViewSet,QuestionListViewSet
 import xadmin
 router = DefaultRouter()
 router.register(r'answer', AnswerListViewSet) #, base_name="answer"
+router.register(r'question', QuestionListViewSet)
 urlpatterns = [
    # url(r'^admin/', admin.site.urls),
 
@@ -38,7 +39,7 @@ urlpatterns = [
     url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),  # 静态文件加载，media文件
 
     #api
-url(r'^', include(router.urls)),
+    url(r'^', include(router.urls)),
 
 
 ]
