@@ -80,7 +80,7 @@ class Logout(View):
 
 #所有用户可以看到的，未登录时也是跳转到这
 from .models import Answer,Question
-from .serializer import AnswerSerializer,QuestionSerializer,QuestionCreateSerializer
+from .serializer import AnswerSerializer,QuestionSerializer,QuestionCreateSerializer,AnswerCreateSerializer
 class AnswerPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
@@ -108,6 +108,18 @@ class AnswerListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,mixins.
     #     # instance.save()
     #     serializer = self.get_serializer(instance)
     #     return Response(serializer.data)
+
+    def get_serializer_class(self):
+        '''
+        不能共用一个序列化类，depth，信息也要一块传递
+        :return:
+        '''
+        if self.action == "retrieve":
+            return AnswerSerializer
+        elif self.action == "create":
+            return AnswerCreateSerializer
+
+        return AnswerSerializer
 
 class QuestionPagination(PageNumberPagination):
     page_size = 1
@@ -180,3 +192,19 @@ class QuestionListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,mixin
 #
 #     def perform_create(self, serializer):
 #         return serializer.save()
+
+
+class CommentViewSet(mixins.ListModelMixin,mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,viewsets.GenericViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    pagination_class = QuestionPagination #可以共用--写在配置文件中
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        #不真正删除
+        instance.status = False
+        instance.save()

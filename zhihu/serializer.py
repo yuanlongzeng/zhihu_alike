@@ -8,6 +8,13 @@ class AnswerSerializer(serializers.ModelSerializer):
         fields = "__all__"
         depth = 1
 
+class AnswerCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Answer
+        fields = "__all__"
+
+
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
@@ -23,4 +30,4 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = "__all__"
-        depth = 1
+        #depth = 1
