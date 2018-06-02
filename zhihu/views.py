@@ -88,7 +88,7 @@ class AnswerPagination(PageNumberPagination):
     max_page_size = 100
 
 
-class AnswerListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class AnswerListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,mixins.CreateModelMixin,mixins.UpdateModelMixin, viewsets.GenericViewSet):
     """
     Answer列表页
     """
@@ -101,13 +101,13 @@ class AnswerListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewse
     #filter_class = AnswerFilter
     #search_fields = ('name', 'goods_brief', 'goods_desc')
     #ordering_fields = ('sold_num', 'shop_price')
-
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        # instance.click_num += 1
-        # instance.save()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+    #不做额外的操作就不必重写该函数
+    # def retrieve(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     # instance.click_num += 1
+    #     # instance.save()
+    #     serializer = self.get_serializer(instance)
+    #     return Response(serializer.data)
 
 class QuestionPagination(PageNumberPagination):
     page_size = 1
@@ -116,7 +116,7 @@ class QuestionPagination(PageNumberPagination):
     max_page_size = 100
 
 
-class QuestionListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,mixins.CreateModelMixin, viewsets.GenericViewSet):
+class QuestionListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,mixins.CreateModelMixin,mixins.UpdateModelMixin, viewsets.GenericViewSet):
     """
     Answer列表页
     """
@@ -141,42 +141,42 @@ class QuestionListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,mixin
 
         return QuestionSerializer
 
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        # instance.click_num += 1
-        # instance.save()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-
-    def create(self, request, *args, **kwargs):
-        '''
-        {
-"creator":1,
-"editor":1,
-"title": "你的问题？",
-    "content": "具体要问什么",
-    "clicks": 0,
-    "created_date": "2018-05-29T20:57:44.120890+08:00",
-    "recent_modify_date": "2018-05-29T20:57:44.120890+08:00",
-    "status": true,
-    "topics":[1,2]
-}
-        '''
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        #保存数据
-        user = self.perform_create(serializer)
-
-        re_dict = serializer.data
-        # payload = jwt_payload_handler(user)
-        # re_dict["token"] = jwt_encode_handler(payload)
-        #re_dict["name"] = user.name if user.name else user.username
-
-        headers = self.get_success_headers(serializer.data)
-        return Response(re_dict, status=status.HTTP_201_CREATED, headers=headers)
-
-    def get_object(self):
-        return self.request.user
-
-    def perform_create(self, serializer):
-        return serializer.save()
+#     def retrieve(self, request, *args, **kwargs):
+#         instance = self.get_object()
+#         # instance.click_num += 1
+#         # instance.save()
+#         serializer = self.get_serializer(instance)
+#         return Response(serializer.data)
+#
+#     def create(self, request, *args, **kwargs):
+#         '''
+#         {
+# "creator":1,
+# "editor":1,
+# "title": "你的问题？",
+#     "content": "具体要问什么",
+#     "clicks": 0,
+#     "created_date": "2018-05-29T20:57:44.120890+08:00",
+#     "recent_modify_date": "2018-05-29T20:57:44.120890+08:00",
+#     "status": true,
+#     "topics":[1,2]
+# }
+#         '''
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         #保存数据
+#         user = self.perform_create(serializer)
+#
+#         re_dict = serializer.data
+#         # payload = jwt_payload_handler(user)
+#         # re_dict["token"] = jwt_encode_handler(payload)
+#         #re_dict["name"] = user.name if user.name else user.username
+#
+#         headers = self.get_success_headers(serializer.data)
+#         return Response(re_dict, status=status.HTTP_201_CREATED, headers=headers)
+#
+#     def get_object(self):
+#         return self.request.user
+#
+#     def perform_create(self, serializer):
+#         return serializer.save()
