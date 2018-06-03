@@ -16,7 +16,7 @@ from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 
-from zhihu.models import UserProfile, Comment
+from zhihu.models import UserProfile, Comment, Topic
 from .forms import LoginForm
 
 
@@ -80,7 +80,10 @@ class Logout(View):
 
 #所有用户可以看到的，未登录时也是跳转到这
 from .models import Answer,Question
-from .serializer import AnswerSerializer,QuestionSerializer,QuestionCreateSerializer,AnswerCreateSerializer
+from .serializer import AnswerSerializer, QuestionSerializer, QuestionCreateSerializer, AnswerCreateSerializer, \
+    CommentSerializer, TopicSerializer
+
+
 class AnswerPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
@@ -88,7 +91,7 @@ class AnswerPagination(PageNumberPagination):
     max_page_size = 100
 
 
-class AnswerListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,mixins.CreateModelMixin,mixins.UpdateModelMixin, viewsets.GenericViewSet):
+class AnswerListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,mixins.CreateModelMixin,mixins.UpdateModelMixin, mixins.DestroyModelMixin,viewsets.GenericViewSet):
     """
     Answer列表页
     """
@@ -121,6 +124,16 @@ class AnswerListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,mixins.
 
         return AnswerSerializer
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        #不真正删除
+        instance.status = False
+        instance.save()
+
 class QuestionPagination(PageNumberPagination):
     page_size = 1
     page_size_query_param = 'page_size'
@@ -128,7 +141,7 @@ class QuestionPagination(PageNumberPagination):
     max_page_size = 100
 
 
-class QuestionListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,mixins.CreateModelMixin,mixins.UpdateModelMixin, viewsets.GenericViewSet):
+class QuestionListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,mixins.CreateModelMixin,mixins.UpdateModelMixin, mixins.DestroyModelMixin,viewsets.GenericViewSet):
     """
     Answer列表页
     """
@@ -152,6 +165,15 @@ class QuestionListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,mixin
             return QuestionCreateSerializer
 
         return QuestionSerializer
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        #不真正删除
+        instance.status = False
+        instance.save()
 
 #     def retrieve(self, request, *args, **kwargs):
 #         instance = self.get_object()
@@ -197,6 +219,21 @@ class QuestionListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,mixin
 class CommentViewSet(mixins.ListModelMixin,mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,viewsets.GenericViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    pagination_class = QuestionPagination #可以共用--写在配置文件中
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        #不真正删除
+        instance.status = False
+        instance.save()
+
+class TopicViewSet(mixins.ListModelMixin,mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,viewsets.GenericViewSet):
+    queryset = Topic.objects.all()
+    serializer_class = TopicSerializer
     pagination_class = QuestionPagination #可以共用--写在配置文件中
 
     def destroy(self, request, *args, **kwargs):

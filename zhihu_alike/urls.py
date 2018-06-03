@@ -19,11 +19,13 @@ from django.contrib import admin
 from django.views.static import serve
 from rest_framework.routers import DefaultRouter
 
-from zhihu.views import Index,Login,Logout,AnswerListViewSet,QuestionListViewSet
+from zhihu.views import Index,Login,Logout,AnswerListViewSet,QuestionListViewSet,CommentViewSet,TopicViewSet
 import xadmin
 router = DefaultRouter()
 router.register(r'answer', AnswerListViewSet) #, base_name="answer"
 router.register(r'question', QuestionListViewSet)
+router.register(r'comment', CommentViewSet)
+router.register(r'topic', TopicViewSet)
 urlpatterns = [
    # url(r'^admin/', admin.site.urls),
 
