@@ -17,9 +17,11 @@ from django.conf import settings
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.views.static import serve
+
 from rest_framework.routers import DefaultRouter
 
 from zhihu.views import Index,Login,Logout,AnswerListViewSet,QuestionListViewSet,CommentViewSet,TopicViewSet
+from zhihu import genericview
 import xadmin
 router = DefaultRouter()
 router.register(r'answer', AnswerListViewSet) #, base_name="answer"
@@ -37,6 +39,15 @@ urlpatterns = [
     url(r'^$',Index.as_view(),name="index"),
     url(r'^login/$',Login.as_view(),name="login"),
     url(r'^logout/$',Logout.as_view(),name="logout"),
+
+    url(r'^userdetail/(?P<pk>.*)$',genericview.IndexView.as_view(),name='user_detail'),
+    url(r'^explore/$',genericview.IndexView.as_view(),name='explore'),
+
+    #answer
+    url(r'^answercontent/(?P<pk>.*)$',genericview.ShowAnswerView.as_view(),name='answer_content'),
+
+    # topic
+    url(r'^topicdetail/(?P<pk>.*)$', genericview.ShowAnswerView.as_view(), name='topic_detail'),
 
     url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),  # 静态文件加载，media文件
 

@@ -1,3 +1,4 @@
+import hashlib
 from datetime import datetime
 
 from django.db import models
@@ -32,6 +33,22 @@ class UserProfile(AbstractUser):
 
     def __str__(self):
         return self.nick_name
+
+    def update(self, data):
+        self.nickname = data.get('nickname')
+        self.gender = data.get('gender')
+        self.desc = data.get('desc')
+        self.photo = data.get('photo')
+        self.save()
+
+    @property
+    def get_image_url(self):
+        if self.photo is None or self.photo is '':
+            url = 'https://cdn.v2ex.com/gravatar/{id}?default=monsterid&size=256'
+            image_id = hashlib.md5(self.email.lower().encode('utf-8')).hexdigest()
+            return url.format(id=image_id)
+        else:
+            return self.photo
 
     def voteup(self, answer):
         if self.is_voted(answer):
