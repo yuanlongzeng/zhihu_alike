@@ -9,7 +9,7 @@
                 <span style="color: #8590a6">&nbsp;回复&nbsp;</span>
                 <a style="color: black" href="{% url 'users:detail' comment.reply_to.author.id %}">{{ comment.reply_to.author.nickname }}</a>
             {% endif %}
-            <span class="datetime" style="float: right">{{ comment.create_time|naturaltime }}</span>
+            <span class="datetime" style="float: right">{{ comment.created_date|naturaltime }}</span>
         </span>
         </div>
         <div class="commentItem-content">{{ comment.content }}</div>

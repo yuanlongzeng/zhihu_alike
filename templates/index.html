@@ -35,23 +35,23 @@
 
 {% block script %}
 
-{#    <script>#}
-{#        function answersMore(x, page) {#}
-{#        let link = '{% if explore %}{% url 'explore' %}{% elif topic %}{% url 'topics:detail' topic.id %}{% else %}{% url 'index' %}{% endif %}' + '?page=' + page;#}
-{#        $(x).html('<i class="icon icon-spin icon-spinner-snake"></i> 加载中...');#}
-{#        fetch(link, {#}
-{#            method: 'GET',#}
-{#            credentials: 'include'#}
-{#        }).then(response => {#}
-{#            if (response.ok) {#}
-{#                return response.text();#}
-{#            } else {#}
-{#                throw new Error('404!')#}
-{#            }#}
-{#        }).then(data => {#}
-{#            $('#answers-list').append(data);#}
-{#            $(x).hide();#}
-{#        }).catch(e => console.log(e));#}
-{#    }#}
-{#    </script>#}
+    <script>
+        function answersMore(x, page) {
+        let link = '{% if explore %}{% url 'explore' %}{% elif topic %}{% url 'topic_detail' topic.id %}{% else %}{% url 'index' %}{% endif %}' + '?page=' + page;
+        $(x).html('<i class="icon icon-spin icon-spinner-snake"></i> 加载中...');
+        fetch(link, {
+            method: 'GET',
+            credentials: 'include'
+        }).then(response => {
+            if (response.ok) {
+                return response.text();
+            } else {
+                throw new Error('404!')
+            }
+        }).then(data => {
+            $('#answers-list').append(data);
+            $(x).hide();
+        }).catch(e => console.log(e));
+    }
+    </script>
 {% endblock %}
