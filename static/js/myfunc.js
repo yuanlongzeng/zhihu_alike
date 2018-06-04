@@ -78,7 +78,7 @@ function register() {
 function voteUp(x, id) {
     let headers = new Headers();
     headers.append('X-CSRFToken', getCookie('csrftoken'));
-    let link = '/answers/' + id + '/voteup/';
+    let link = '/answervoteup/'+ id;
     fetch(link, {
         headers: headers,
         method: 'POST',
@@ -101,7 +101,7 @@ function voteUp(x, id) {
 function voteDown(x, id) {
     let headers = new Headers();
     headers.append('X-CSRFToken', getCookie('csrftoken'));
-    let link = '/answers/' + id + '/votedown/';
+    let link = '/answervotedown/'+ id;
     fetch(link, {
         headers: headers,
         method: 'POST',
@@ -215,7 +215,7 @@ function unfollowAsk(x, id) {
 }
 
 function readmore(x, id) {
-    let link = '/answers/' + id + '/content/';
+    let link = '/answercontent/'+id;
     fetch(link, {
         method: 'GET',
         credentials: 'include'

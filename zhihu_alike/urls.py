@@ -45,6 +45,8 @@ urlpatterns = [
 
     #answer
     url(r'^answercontent/(?P<pk>.*)$',genericview.ShowAnswerView.as_view(),name='answer_content'),
+    url(r'^answervoteup/(?P<pk>.*)$',genericview.vote_up,name='answer_voteup'),
+    url(r'^answervotedown/(?P<pk>.*)$',genericview.vote_down,name='answer_votedown'),
 
     # topic
     url(r'^topicdetail/(?P<pk>.*)$', genericview.ShowAnswerView.as_view(), name='topic_detail'),

@@ -9,6 +9,6 @@ def validate_email_phone(value):
     else:
         return RegexValidator(regex="1\d{10}")
 class LoginForm(forms.Form):
-    account = forms.CharField(max_length=50,validators=[validate_email_phone])
+    account = forms.CharField(max_length=50)
     password = forms.CharField(min_length=6,max_length=30)
 

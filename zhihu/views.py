@@ -24,7 +24,8 @@ from .forms import LoginForm
 class Index(View):
     def get(self,request):
         if not request.user.is_authenticated():
-            return HttpResponseRedirect(reverse("login"))
+            return HttpResponseRedirect(reverse("explore"))
+            #return HttpResponseRedirect(reverse("login"))
         #取用户的关注列表、话题等 然后根据用户活跃度使用推还是拉模式
         #还得有分页设置--最好使用drf来完成
 
@@ -38,7 +39,7 @@ class IndexViewset(viewsets.ModelViewSet):
 class CustomAuth(ModelBackend):  # 自定义用户登录验证查询
     def authenticate(self, username=None, password=None, **kwargs):
         try:
-            user = UserProfile.objects.get(Q(mobile=username) | Q(email=username))  # 未查到或者查找到多个都会抛出异常
+            user = UserProfile.objects.get(Q(mobile=username) | Q(email=username)| Q(username=username)| Q(nick_name=username))  # 未查到或者查找到多个都会抛出异常
             if user.check_password(password):
                 return user
         except:
@@ -52,7 +53,7 @@ class Login(View):
     def post(self,request):
         login_form= LoginForm(request.POST)
         if login_form.is_valid():
-            user_name = request.POST.get("username", "")
+            user_name = request.POST.get("account", "")
             pass_word = request.POST.get("password", "")
             # 成功返回user对象,失败返回null
             user = authenticate(username=user_name, password=pass_word)

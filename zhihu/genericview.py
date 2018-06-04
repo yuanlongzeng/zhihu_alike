@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import PageNotAnInteger, EmptyPage, Paginator
 from django.http import HttpResponseNotFound, JsonResponse
 from django.shortcuts import render
@@ -67,3 +68,44 @@ class ShowAnswerView(generic.DetailView):
         data['content'] = answer.content
         data['create_time'] = answer.created_date.date()
         return JsonResponse(data)
+
+
+#答案点赞、反对
+@login_required
+def vote_up(request, pk):
+    data = dict(
+        r=1,
+    )
+    if request.method == 'POST':
+        user = request.user
+        answer = Answer.objects.filter(id=pk).first()
+        if answer is not None:
+            ret = user.voteup(answer)
+            if ret is True:
+                data['r'] = 0
+                data['count'] = answer.votesup
+                #logger.info('{} 赞同了： {}'.format(user, answer.id))
+            else:
+                pass
+                #logger.error('{} 赞同失败: {}'.format(user, answer.id))
+    return JsonResponse(data, status=201)
+
+
+@login_required
+def vote_down(request, pk):
+    data = dict(
+        r=1,
+    )
+    if request.method == 'POST':
+        user = request.user
+        answer = Answer.objects.filter(id=pk).first()
+        if answer is not None:
+            ret = user.votedown(answer)
+            if ret is True:
+                data['r'] = 0
+                data['count'] = answer.votesup
+                #logger.info('{} 取消了赞： {}'.format(user, answer.id))
+            else:
+                #logger.error('{} 取消赞失败: {}'.format(user, answer.id))
+                pass
+    return JsonResponse(data, status=201)
