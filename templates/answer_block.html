@@ -5,7 +5,7 @@
     </div>
 {% endif %}
     <div class="answer-card-header">
-        <img src="/media/{{ answer.user.get_image_url }}" class="img-rounded" width="38px"
+        <img src="{{ MEDIA_URL }}{{ answer.user.get_image_url }}" class="img-rounded" width="38px"
              height="38px">
         <div class="user-info">
             <a href="{% url 'user_detail' answer.user.id %}" class="user-name">{{ answer.user.nick_name }}</a>
