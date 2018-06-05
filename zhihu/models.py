@@ -166,7 +166,7 @@ class Question(models.Model):
     created_date = models.DateTimeField(default=timezone.now,verbose_name="创建时间")
     recent_modify_date = models.DateTimeField(default=timezone.now,verbose_name="修改时间")
 
-    conmment_list = GenericRelation("Comment", verbose_name="评论列表")
+    comment_list = GenericRelation("Comment", verbose_name="评论列表")
     #comment = models.ManyToManyField(Comment,blank=True,null=True,verbose_name="评论")
     #answer = models.ForeignKey("Answer")  #应该是由问题得到答案的多---但是问题应该只存一份即可  要是放这就得每一个回答就得新建一个问题 --冗余  而放在回答中就只需要存问题的id就可以
     status = models.BooleanField(default=True, verbose_name="有效标志")
@@ -217,7 +217,7 @@ class Answer(models.Model):
     question = models.ForeignKey("Question",verbose_name="回答",related_name="question")
     status = models.BooleanField(default=True, verbose_name="有效标志")
     # 仅用于反向查找
-    conmment_list = GenericRelation("Comment",verbose_name="评论列表")
+    comment_list = GenericRelation("Comment",verbose_name="评论列表")
 
     class Meta:
         verbose_name = "回答"
@@ -242,7 +242,7 @@ class Article(models.Model):
     column = models.ForeignKey("Column",verbose_name="所属专栏")
     created_date = models.DateTimeField(default=timezone.now, verbose_name="创建时间")
     recent_modify_date = models.DateTimeField(default=timezone.now, verbose_name="修改时间")
-    conmment_list = GenericRelation("Comment",blank=True,null=True,verbose_name="评论列表")
+    comment_list = GenericRelation("Comment",blank=True,null=True,verbose_name="评论列表")
     status = models.BooleanField(default=True, verbose_name="有效标志")
 
     class Meta:

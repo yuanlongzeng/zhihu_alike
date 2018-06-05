@@ -4,7 +4,7 @@ from django.http import HttpResponseNotFound, JsonResponse
 from django.shortcuts import render
 from django.views import generic
 
-from zhihu.models import Question, Answer
+from zhihu.models import Question, Answer, Comment
 
 
 class IndexView(generic.DetailView):
@@ -109,3 +109,16 @@ def vote_down(request, pk):
                 #logger.error('{} 取消赞失败: {}'.format(user, answer.id))
                 pass
     return JsonResponse(data, status=201)
+
+#评论列表
+class CommentsListView(generic.ListView):
+    template_name = 'commentslist.html'
+    model = Comment
+    context_object_name = 'comments'
+
+    def get_queryset(self):
+        answer_id = self.kwargs['pk']
+        answer = Answer.objects.get(pk=int(answer_id))
+        # queryset = Comment.objects.all().filter(content_object=answer).order_by('-created_date')
+        queryset = Comment.objects.all().filter(content_type=7,object_id=int(answer_id)).order_by('-created_date')
+        return queryset
