@@ -53,6 +53,7 @@ urlpatterns = [
 
     #comment
     url(r'^commentslist/(?P<pk>.*)$',genericview.CommentsListView.as_view(),name='comments_list'),
+    url(r'^commentsdelete/(?P<pk>.*)$',genericview.DeleteCommentView.as_view(),name='comments_delete'),
 
     url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),  # 静态文件加载，media文件
 

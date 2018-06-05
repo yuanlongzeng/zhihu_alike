@@ -19,10 +19,10 @@
         <button class="footer-tab reply-btn" onclick="reply(this, {{ comment.answer.id }}, {{ comment.id }})" style="margin: 0">
             <i class="icon icon-share-alt"></i> 回复
         </button>
-        {% if user.is_staff or user == comment.author or user == answer.author %}
-{#            <form style="display: inline" action="{% url 'comments:delete' pk=comment.id %}" method="post">{% csrf_token %}#}
-{#                <button class="footer-tab reply-btn" type="submit" style="margin: 0"><i class="icon icon-trash"></i> 删除</button>#}
-{#            </form>#}
+        {% if user.is_staff or user == comment.user or user == answer.user %}
+            <form style="display: inline" action="{% url 'comments_delete' pk=comment.id %}" method="post">{% csrf_token %}
+                <button class="footer-tab reply-btn" type="submit" style="margin: 0"><i class="icon icon-trash"></i> 删除</button>
+            </form>
         {% endif %}
     </div>
 

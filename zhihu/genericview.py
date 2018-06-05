@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import PageNotAnInteger, EmptyPage, Paginator
-from django.http import HttpResponseNotFound, JsonResponse
+from django.http import HttpResponseNotFound, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.views import generic
 
@@ -120,5 +121,20 @@ class CommentsListView(generic.ListView):
         answer_id = self.kwargs['pk']
         answer = Answer.objects.get(pk=int(answer_id))
         # queryset = Comment.objects.all().filter(content_object=answer).order_by('-created_date')
-        queryset = Comment.objects.all().filter(content_type=7,object_id=int(answer_id)).order_by('-created_date')
+        queryset = Comment.objects.all().filter(content_type=7,object_id=int(answer_id),status=True).order_by('-created_date')
         return queryset
+
+class DeleteCommentView(LoginRequiredMixin, generic.DeleteView):
+    model = Comment
+
+    def get_success_url(self):
+        #logger.info('评论：{} 删除成功'.format(self.object.id))
+        return self.request.META.get('HTTP_REFERER', '/')
+
+    def delete(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        comment = Comment.objects.get(pk=int(pk))
+        comment.status = False
+        comment.save()
+
+        return HttpResponseRedirect(self.get_success_url())
