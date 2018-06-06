@@ -234,6 +234,9 @@ class Answer(models.Model):
         self.votesup -= 1
         self.save()
 
+    def comment_cnt(self):
+        return self.comment_list.filter(status=True).count()
+
 
 class Article(models.Model):
     user = models.ForeignKey(UserProfile,verbose_name="作者") #可能会有很多  暂时先只能有一个
