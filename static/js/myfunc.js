@@ -124,7 +124,7 @@ function voteDown(x, id) {
 function collect(x, id) {
     let headers = new Headers();
     headers.append('X-CSRFToken', getCookie('csrftoken'));
-    let link = '/answers/' + id + '/collect/';
+    let link = '/answercollect/' + id;
     fetch(link, {
         headers: headers,
         method: 'POST',
@@ -147,7 +147,7 @@ function collect(x, id) {
 function uncollect(x, id) {
     let headers = new Headers();
     headers.append('X-CSRFToken', getCookie('csrftoken'));
-    let link = '/answers/' + id + '/uncollect/';
+    let link = '/answeruncollect/' + id;
     fetch(link, {
         headers: headers,
         method: 'POST',
@@ -168,7 +168,7 @@ function uncollect(x, id) {
 }
 
 function followAsk(x, id) {
-    let link = '/asks/' + id + '/follow/';
+    let link = '/asksfollow/' + id;
     let headers = new Headers();
     headers.append('X-CSRFToken', getCookie('csrftoken'));
     fetch(link, {
@@ -191,7 +191,7 @@ function followAsk(x, id) {
 }
 
 function unfollowAsk(x, id) {
-    let link = '/asks/' + id + '/unfollow/';
+    let link = '/asksunfollow/' + id;
     let headers = new Headers();
     headers.append('X-CSRFToken', getCookie('csrftoken'));
     fetch(link, {
@@ -223,7 +223,7 @@ function readmore(x, id) {
     ).then(data => {
         if (!data.r) {
             $(x).siblings('span').hide();
-            $(x).parent().html(data.content).append('<div class="answer-time">编辑于' + data.create_time + '</p>');
+            $(x).parent().html(data.content).append('<div class="answer-time">编辑于' + data.created_date + '</p>');
         } else {
             alert('error!')
         }
@@ -248,7 +248,7 @@ function showComments(x, id) {
     $('#commentList-' + id).show();
     $(x).hide().next().show();
     $('#comments-' + id).append('<i class="icon icon-spin icon-spinner-snake"></i> 加载中...');
-    let link = `/comments/answer/${id}/`;
+    let link = `/commentslist/${id}`;
     fetch(link, {
         method: 'GET',
         credentials: 'include'
