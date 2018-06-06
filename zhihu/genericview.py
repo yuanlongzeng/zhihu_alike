@@ -138,3 +138,44 @@ class DeleteCommentView(LoginRequiredMixin, generic.DeleteView):
         comment.save()
 
         return HttpResponseRedirect(self.get_success_url())
+
+
+#收藏答案
+@login_required
+def collect(request, pk):
+    data = dict(
+        r=1,
+    )
+    if request.method == 'POST':
+        user = request.user
+        pk = int(pk)
+        answer = Answer.objects.filter(id=pk).first()
+        if answer is not None:
+            ret = user.collect(answer)
+            if ret is True:
+                data['r'] = 0
+                #logger.info('{} 收藏了： {}'.format(user, answer.id))
+            else:
+                pass
+                #logger.error('{} 收藏失败: {}'.format(user, answer.id))
+    return JsonResponse(data, status=201)
+
+
+@login_required
+def uncollect(request, pk):
+    data = dict(
+        r=1,
+    )
+    if request.method == 'POST':
+        user = request.user
+        pk = int(pk)
+        answer = Answer.objects.filter(id=pk).first()
+        if answer is not None:
+            ret = user.uncollect(answer)
+            if ret is True:
+                data['r'] = 0
+                #logger.info('{} 取消了收藏： {}'.format(user, answer.id))
+            else:
+                pass
+                #logger.error('{} 取消收藏失败: {}'.format(user, answer.id))
+    return JsonResponse(data, status=201)

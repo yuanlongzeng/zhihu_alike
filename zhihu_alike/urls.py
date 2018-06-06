@@ -47,6 +47,9 @@ urlpatterns = [
     url(r'^answercontent/(?P<pk>.*)$',genericview.ShowAnswerView.as_view(),name='answer_content'),
     url(r'^answervoteup/(?P<pk>.*)$',genericview.vote_up,name='answer_voteup'),
     url(r'^answervotedown/(?P<pk>.*)$',genericview.vote_down,name='answer_votedown'),
+    #收藏
+    url(r'^answercollect/(?P<pk>.*)$',genericview.collect,name='answer_collect'),
+    url(r'^answeruncollect/(?P<pk>.*)$',genericview.uncollect,name='answer_uncollect'),
 
     # topic
     url(r'^topicdetail/(?P<pk>.*)$', genericview.ShowAnswerView.as_view(), name='topic_detail'),

@@ -76,7 +76,7 @@ class UserProfile(AbstractUser):
     def uncollect(self, answer):
         if not self.is_collected(answer):
             return False
-        self.collections.add(answer)
+        self.collections.remove(answer)
         return True
 
     def is_collected(self, answer):
