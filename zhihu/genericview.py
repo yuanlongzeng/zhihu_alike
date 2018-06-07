@@ -2,9 +2,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import PageNotAnInteger, EmptyPage, Paginator
 from django.http import HttpResponseNotFound, JsonResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views import generic
 
+from zhihu.forms import AnswerForm
 from zhihu.models import Question, Answer, Comment
 
 
@@ -79,7 +80,7 @@ def vote_up(request, pk):
     )
     if request.method == 'POST':
         user = request.user
-        answer = Answer.objects.filter(id=pk).first()
+        answer = Answer.objects.filter(id=int(pk)).first()
         if answer is not None:
             ret = user.voteup(answer)
             if ret is True:
@@ -99,7 +100,7 @@ def vote_down(request, pk):
     )
     if request.method == 'POST':
         user = request.user
-        answer = Answer.objects.filter(id=pk).first()
+        answer = Answer.objects.filter(id=int(pk)).first()
         if answer is not None:
             ret = user.votedown(answer)
             if ret is True:
@@ -149,7 +150,7 @@ def collect(request, pk):
     if request.method == 'POST':
         user = request.user
         pk = int(pk)
-        answer = Answer.objects.filter(id=pk).first()
+        answer = Answer.objects.filter(id=int(pk)).first()
         if answer is not None:
             ret = user.collect(answer)
             if ret is True:
@@ -169,7 +170,7 @@ def uncollect(request, pk):
     if request.method == 'POST':
         user = request.user
         pk = int(pk)
-        answer = Answer.objects.filter(id=pk).first()
+        answer = Answer.objects.filter(id=int(pk)).first()
         if answer is not None:
             ret = user.uncollect(answer)
             if ret is True:
@@ -179,3 +180,142 @@ def uncollect(request, pk):
                 pass
                 #logger.error('{} 取消收藏失败: {}'.format(user, answer.id))
     return JsonResponse(data, status=201)
+
+#提问相关
+class CreateQuestionView(LoginRequiredMixin, generic.CreateView):
+    model = Question
+    fields = ['title', 'topics', 'content']
+
+    def form_valid(self, form):
+        ask = form.save(commit=False)
+        ask.author = self.request.user
+        ask.save()
+        #logger.info('{} 提了问题：{}'.format(self.request.user, ask))
+        topics = self.request.POST.get('topics_list', '')
+        topics = topics.split(',')
+        ask.add_topics(topics)
+        return redirect('asks:detail', pk=ask.id)
+
+    def form_invalid(self, form):
+        #logger.error('提问题错误')
+        return redirect('index')
+
+
+class QuestionDetailView(generic.FormView, generic.DetailView):
+    model = Question
+    form_class = AnswerForm
+    template_name = 'question_detail.html'
+    context_object_name = 'ask'
+
+    def get_context_data(self, **kwargs):
+        context = super(QuestionDetailView, self).get_context_data(**kwargs)
+        asks = Question.objects.all().order_by('-created_date')[:5]
+        vote_list = []
+        collection_list = []
+        answers_list = self.object.answers.order_by('-votesup', '-created_date')
+        paginator = Paginator(answers_list, 5)
+        topics_list = self.object.topics.all()
+        if self.request.user.is_authenticated:
+            for answer in answers_list:
+                if self.request.user.is_voted(answer):
+                    vote_list.append(answer)
+                if self.request.user.is_collected(answer):
+                    collection_list.append(answer)
+        context['vote_list'] = vote_list
+        context['collection_list'] = collection_list
+        context['asks'] = asks
+        context['answers'] = paginator.page(1)
+        context['topics_list'] = topics_list
+        return context
+
+    def get(self, request, *args, **kwargs):
+        super(QuestionDetailView, self).get(request, *args, **kwargs)
+        vote_list = []
+        collection_list = []
+        self.object.click()
+        page = request.GET.get('page', None)
+        if page is None:
+            context = self.get_context_data(**kwargs)
+            return self.render_to_response(context)
+
+        answers_list = self.object.answers.order_by('-votes', '-create_time')
+        paginator = Paginator(answers_list, 5)
+        try:
+            answers = paginator.page(page)
+        except PageNotAnInteger or EmptyPage:
+            return HttpResponseNotFound
+        if self.request.user.is_authenticated:
+            for answer in answers_list:
+                if self.request.user.is_voted(answer):
+                    vote_list.append(answer)
+                if self.request.user.is_collected(answer):
+                    collection_list.append(answer)
+        context = dict(answers=answers, vote_list=vote_list, collection_list=collection_list, is_ask_index=True)
+        return render(request, 'answerslist.html', context)
+
+
+class QuestionAnswerDetailView(generic.FormView, generic.DetailView):
+    model = Question
+    form_class = AnswerForm
+    template_name = 'question_detail.html'
+    context_object_name = 'ask'
+
+    def get_context_data(self, **kwargs):
+        context = super(QuestionAnswerDetailView, self).get_context_data(**kwargs)
+        asks = Question.objects.all().order_by('-created_date')[:5]
+        topics_list = self.object.topics.all()
+        answer = self.object.question.filter(id=self.kwargs['answer_id']).first()
+        vote_list = []
+        collection_list = []
+        if self.request.user.is_authenticated:
+            if self.request.user.is_voted(answer):
+                vote_list.append(answer)
+            if self.request.user.is_collected(answer):
+                collection_list.append(answer)
+        context['vote_list'] = vote_list
+        context['collection_list'] = collection_list
+        context['answer'] = answer
+        context['topics_list'] = topics_list
+        context['asks'] = asks
+        context['answer_view'] = True
+        self.object.click()
+        return context
+
+
+@login_required
+def follow_ask(request, pk):
+    data = dict(
+        r=1,
+    )
+    if request.method == 'POST':
+        user = request.user
+        ask = Question.objects.filter(id=int(pk)).first()
+        if ask is not None:
+            ret = user.follow_ask(ask)
+            if ret is True:
+                data['r'] = 0
+                #logger.info('{} 关注了问题： {}'.format(user, ask.id))
+            else:
+                pass
+                #logger.error('{} 关注问题失败: {}'.format(user, ask.id))
+    return JsonResponse(data, status=201)
+
+
+@login_required
+def unfollow_ask(request, pk):
+    data = dict(
+        r=1,
+    )
+    if request.method == 'POST':
+        user = request.user
+        ask = Question.objects.filter(id=int(pk)).first()
+        if ask is not None:
+            ret = user.unfollow_ask(ask)
+            if ret is True:
+                data['r'] = 0
+                #logger.info('{} 取消关注了问题： {}'.format(user, ask.id))
+            else:
+                pass
+                #logger.error('{} 取消关注问题失败: {}'.format(user, ask.id))
+    return JsonResponse(data, status=201)
+

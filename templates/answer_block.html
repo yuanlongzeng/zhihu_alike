@@ -1,7 +1,7 @@
 <div class="answer-block">
-{% if request.path|slice:":5" != '/asks' %}
+{% if request.path|slice:":9" != '/question' %}
     <div class="answer-ask-header">
-{#        <a href="{% url 'asks:answer_detail' pk=answer.ask.id answer_id=answer.id %}" style="color: black">{{ answer.ask.title }}</a>#}
+        <a href="{% url 'question_answer_detail' pk=answer.question.id answer_id=answer.id %}" style="color: black">{{ answer.question.title }}</a>
     </div>
 {% endif %}
     <div class="answer-card-header">
