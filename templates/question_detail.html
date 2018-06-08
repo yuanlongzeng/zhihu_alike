@@ -67,10 +67,10 @@
 {% block main %}
     <div id="answer-card" class="card" style="display: none">
         <div class="answer-card-header">
-            <img src="{{ user.get_image_url }}" class="img-rounded" width="38px" height="38px">
+            <img src="{{ MEDIA_URL }}{{ ask.answer.user.get_image_url }}" class="img-rounded" width="38px" height="38px">
             <div class="user-info">
-                <div class="user-name">{{ user.nickname }}</div>
-                <div class="user-intro">{{ user.intro }}</div>
+                <div class="user-name">{{ user.nick_name }}</div>
+                <div class="user-intro">{{ user.desc }}</div>
             </div>
         </div>
 
@@ -80,7 +80,7 @@
             <form action="{% url 'question_create' ask.id %}" method="post">
                 {% csrf_token %}
                 {{ form.content }}
-                {{ form.content_text }}
+                {{ form.content }}
                 <button type="submit" class="btn btn-primary"
                         style="float: right;margin-right: 10px">回答问题
                 </button>
@@ -120,16 +120,19 @@
         <div class="card">
             <div class="card-header">关于作者</div>
             <div>
-                <img src="{{ answer.author.get_image_url }}" class="pull-left image-card">
-{#                <a href="{% url 'users:detail' answer.author.id %}" class="user-name"><h2>{{ answer.author.nickname }}</h2></a>#}
-                <p>{{ answer.author.intro }}</p>
+                <img src="{{ MEDIA_URL }}{{ answer.user.get_image_url }}" class="pull-left image-card">
+                <a
+{#                        href="{% url 'users:detail' answer.author.id %}" #}
+                        class="user-name">
+                    <h2>{{ answer.user.nick_name }}</h2></a>
+                <p>{{ answer.user.desc }}</p>
             </div>
             <br>
             <div class="col-xs-6">
 {#                <a href="{% url 'users:answers' answer.author.id %}">#}
                 <div class="follow-board">
                     <div class="NumberBoard-itemname">回答</div>
-                    <div class="NumberBoard-itemnum">{{ answer.author.answers.count }}</div>
+                    <div class="NumberBoard-itemnum">{{ answer.user.answer_set.count }}</div>
                 </div>
                 </a>
 
@@ -138,7 +141,7 @@
 {#                <a href="{% url 'users:followers' answer.author.id %}">#}
                 <div class="follow-board">
                     <div class="NumberBoard-itemname">关注者</div>
-                    <div class="NumberBoard-itemnum">{{ answer.author.funs.count }}</div>
+                    <div class="NumberBoard-itemnum">{{ answer.user.funs.count }}</div>
                 </div>
                 </a>
             </div>

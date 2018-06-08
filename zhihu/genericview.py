@@ -274,7 +274,7 @@ class QuestionAnswerDetailView(generic.FormView, generic.DetailView):
                 collection_list.append(answer)
         context['vote_list'] = vote_list
         context['collection_list'] = collection_list
-        context['answer'] = answer
+        context['answers'] = answer
         context['topics_list'] = topics_list
         context['asks'] = asks
         context['answer_view'] = True
