@@ -90,7 +90,7 @@
     {% if answer_view %}
         {% if ask.answers.count > 1 %}
         <div class="card button-card">
-            <a href="{% url 'question_detail' ask.id %}">查看全部{{ ask.answers.count }}个回答</a>
+            <a href="{% url 'question_detail' ask.id %}">查看全部{{ ask.answer_cnt }}个回答</a>
         </div>
         {% endif %}
         <div class="card">
@@ -98,12 +98,12 @@
         </div>
         {% if ask.answers.count > 1 %}
         <div class="card button-card">
-            <a href="{% url 'question_detail' ask.id %}">查看全部{{ ask.answers.count }}个回答</a>
+            <a href="{% url 'question_detail' ask.id %}">查看全部{{ ask.answer_cnt }}个回答</a>
         </div>
         {% endif %}
     {% else %}
         <div class="card" id="answers-list">
-            <div style="padding: 10px; font-size: 15px; font-weight: 600">{{ ask.answers.count }}个回答</div>
+            <div style="padding: 10px; font-size: 15px; font-weight: 600">{{ ask.answer_cnt }}个回答</div>
             {% for answer in answers %}
                 {% include "answer_block.html" %}
             {% endfor %}

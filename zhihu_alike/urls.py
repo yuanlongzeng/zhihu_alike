@@ -47,7 +47,7 @@ urlpatterns = [
     url(r'^answercontent/(?P<pk>.*)$',genericview.ShowAnswerView.as_view(),name='answer_content'),
     url(r'^answervoteup/(?P<pk>.*)$',genericview.vote_up,name='answer_voteup'),
     url(r'^answervotedown/(?P<pk>.*)$',genericview.vote_down,name='answer_votedown'),
-    url(r'^answerdelete/(?P<pk>.*)$',genericview.DeleteAnswerView,name='answer_delete'),
+    url(r'^answerdelete/(?P<pk>.*)$',genericview.DeleteAnswerView.as_view(),name='answer_delete'),
     # question  注意放的顺序：先长后短
     url(r'^question/(?P<pk>.*)/createanswer$', genericview.CreateAnswerView.as_view(), name='question_create'),
     url(r'^question/(?P<pk>.*)/answer/(?P<answer_id>.*)$', genericview.QuestionAnswerDetailView.as_view(), name='question_answer_detail'),

@@ -191,6 +191,9 @@ class Question(models.Model):
         self.clicks += 1
         self.save()
 
+    def answer_cnt(self):
+        return self.answers.filter(status=True).count()
+
 class Topic(models.Model): #toppic应该可以自由拓展
     name = models.CharField(max_length=50,unique=True,verbose_name="话题名称")
     desc = models.CharField(max_length=100,verbose_name="描述")
