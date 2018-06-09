@@ -188,7 +188,7 @@ class CreateQuestionView(LoginRequiredMixin, generic.CreateView):
 
     def form_valid(self, form):
         ask = form.save(commit=False)
-        ask.author = self.request.user
+        ask.user = self.request.user
         ask.save()
         #logger.info('{} 提了问题：{}'.format(self.request.user, ask))
         topics = self.request.POST.get('topics_list', '')
@@ -251,7 +251,7 @@ class QuestionDetailView(generic.FormView, generic.DetailView):
                     vote_list.append(answer)
                 if self.request.user.is_collected(answer):
                     collection_list.append(answer)
-        context = dict(answers=answers, vote_list=vote_list, collection_list=collection_list, is_ask_index=True)
+        context = dict(answers=answers, vote_list=vote_list, collection_list=collection_list, is_ask_index=True,user=request.user)
         return render(request, 'answerslist.html', context)  #自定义渲染--下一页的答案
 
 
@@ -321,3 +321,23 @@ def unfollow_ask(request, pk):
                 #logger.error('{} 取消关注问题失败: {}'.format(user, ask.id))
     return JsonResponse(data, status=201)
 
+#回答
+class CreateAnswerView(LoginRequiredMixin, generic.CreateView):
+    model = Answer
+    fields = ['content', 'content_text']
+
+    def form_valid(self, form):
+        ask_id = self.kwargs['pk']
+        ask = Question.objects.filter(id=int(ask_id)).first()
+        user = self.request.user
+        if ask is not None:
+            answer = form.save(commit=False)
+            answer.question = ask
+            answer.user = user
+            answer.save()
+            #logger.info('{} 回答了问题 : {}'.format(self.request.user, answer))
+        return redirect(self.request.META.get('HTTP_REFERER', '/'))
+
+    def form_invalid(self, form):
+        #logger.error('answer error')
+        return redirect(self.request.META.get('HTTP_REFERER', '/'))

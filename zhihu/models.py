@@ -210,6 +210,7 @@ class Topic(models.Model): #toppic应该可以自由拓展
 class Answer(models.Model):
     user = models.ForeignKey(UserProfile)
     content = models.TextField()
+    content_text = models.TextField(default=content)
     created_date = models.DateTimeField(default=timezone.now, verbose_name="创建时间")
     recent_modify_date = models.DateTimeField(default=timezone.now, verbose_name="修改时间")
     votesup = models.IntegerField(default=0,verbose_name="赞同")

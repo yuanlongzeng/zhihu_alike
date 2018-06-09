@@ -67,10 +67,10 @@
 {% block main %}
     <div id="answer-card" class="card" style="display: none">
         <div class="answer-card-header">
-            <img src="{{ MEDIA_URL }}{{ answer.user.get_image_url }}" class="img-rounded" width="38px" height="38px">
+            <img src="{{ MEDIA_URL }}{{ user.get_image_url }}" class="img-rounded" width="38px" height="38px">
             <div class="user-info">
-                <div class="user-name">{{ answer.user.nick_name }}</div>
-                <div class="user-intro">{{ answer.user.desc }}</div>
+                <div class="user-name">{{ user.nick_name }}</div>
+                <div class="user-intro">{{ user.desc }}</div>
             </div>
         </div>
 
@@ -79,7 +79,7 @@
         <div style="min-height: 40px">
             <form action="{% url 'question_create' ask.id %}" method="post">
                 {% csrf_token %}
-                {{ form.content }}
+                {{ form.content_text }}
                 {{ form.content }}
                 <button type="submit" class="btn btn-primary"
                         style="float: right;margin-right: 10px">回答问题
