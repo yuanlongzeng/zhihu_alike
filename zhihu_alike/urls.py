@@ -47,6 +47,14 @@ urlpatterns = [
     url(r'^answercontent/(?P<pk>.*)$',genericview.ShowAnswerView.as_view(),name='answer_content'),
     url(r'^answervoteup/(?P<pk>.*)$',genericview.vote_up,name='answer_voteup'),
     url(r'^answervotedown/(?P<pk>.*)$',genericview.vote_down,name='answer_votedown'),
+    url(r'^answerdelete/(?P<pk>.*)$',genericview.DeleteAnswerView,name='answer_delete'),
+    # question  注意放的顺序：先长后短
+    url(r'^question/(?P<pk>.*)/createanswer$', genericview.CreateAnswerView.as_view(), name='question_create'),
+    url(r'^question/(?P<pk>.*)/answer/(?P<answer_id>.*)$', genericview.QuestionAnswerDetailView.as_view(), name='question_answer_detail'),
+    url(r'^question/(?P<pk>.*)/', genericview.QuestionDetailView.as_view(), name='question_detail'),
+
+
+
     #收藏
     url(r'^answercollect/(?P<pk>.*)$',genericview.collect,name='answer_collect'),
     url(r'^answeruncollect/(?P<pk>.*)$',genericview.uncollect,name='answer_uncollect'),
@@ -57,6 +65,7 @@ urlpatterns = [
     #comment
     url(r'^commentslist/(?P<pk>.*)$',genericview.CommentsListView.as_view(),name='comments_list'),
     url(r'^commentsdelete/(?P<pk>.*)$',genericview.DeleteCommentView.as_view(),name='comments_delete'),
+    url(r'^commentscreate/(?P<pk>.*)$',genericview.CommentCreateView.as_view(),name='comments_create'),
 
     url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),  # 静态文件加载，media文件
 

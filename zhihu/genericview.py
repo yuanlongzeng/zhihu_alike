@@ -13,7 +13,7 @@ class IndexView(generic.DetailView):
     template_name = 'index.html'
 
     def get_object(self, queryset=None):
-        answers_list = Answer.objects.order_by('-created_date')
+        answers_list = Answer.objects.filter(status=True).order_by('-created_date')
         paginator = Paginator(answers_list, 10)
         return paginator
 
@@ -125,6 +125,36 @@ class CommentsListView(generic.ListView):
         queryset = Comment.objects.all().filter(content_type=7,object_id=int(answer_id),status=True).order_by('-created_date')
         return queryset
 
+class CommentCreateView(LoginRequiredMixin,generic.CreateView):
+    model = Comment
+    fields = ['content']
+    def form_valid(self, form):
+        try:
+            answer = Answer.objects.filter(id=self.kwargs['pk']).first()
+        except Answer.DoesNotExist:
+            #logger.error('评论错误: 答案 {} 不存在'.format(self.kwargs['pk']))
+            return redirect(self.request.META.get('HTTP_REFERER', '/'))
+        comment = form.save(commit=False)
+        comment.user = self.request.user
+        comment.content_object = answer
+        reply_id = self.request.POST.get('reply_id', 0)
+        if reply_id =='':
+            reply_id = 0
+        try:
+            reply = Comment.objects.filter(id=reply_id).first()
+        except ValueError:
+            #logger.error('回复评论错误： reply_id = {}'.format(reply_id))
+            return redirect(self.request.META.get('HTTP_REFERER', '/'))
+        comment.reply_to = reply
+        comment.save()
+        #logger.info('{} 评论了 {} 的回答'.format(comment.author, answer.author))
+        return redirect(self.request.META.get('HTTP_REFERER', '/'))
+
+    def form_invalid(self, form):
+        #logger.error('comment error')
+        return redirect(self.request.META.get('HTTP_REFERER', '/'))
+
+
 class DeleteCommentView(LoginRequiredMixin, generic.DeleteView):
     model = Comment
 
@@ -212,7 +242,7 @@ class QuestionDetailView(generic.FormView, generic.DetailView):
         asks = Question.objects.all().order_by('-created_date')[:5]
         vote_list = []
         collection_list = []
-        answers_list = self.object.answers.order_by('-votesup', '-created_date')
+        answers_list = self.object.answers.filter(status=True).order_by('-votesup', '-created_date')
         paginator = Paginator(answers_list, 5)
         topics_list = self.object.topics.all()
         if self.request.user.is_authenticated:
@@ -341,3 +371,21 @@ class CreateAnswerView(LoginRequiredMixin, generic.CreateView):
     def form_invalid(self, form):
         #logger.error('answer error')
         return redirect(self.request.META.get('HTTP_REFERER', '/'))
+
+class DeleteAnswerView(LoginRequiredMixin, generic.DeleteView):
+    model = Answer
+
+    def get_success_url(self):
+        #logger.info('答案：{} 删除成功'.format(self.object.id))
+        return self.request.META.get('HTTP_REFERER', '/')
+
+    def delete(self, request, *args, **kwargs):
+        """
+        Calls the delete() method on the fetched object and then
+        redirects to the success URL.
+        """
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        self.object.status=False
+        self.object.save()
+        return HttpResponseRedirect(success_url)

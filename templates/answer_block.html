@@ -48,9 +48,9 @@
         {% endif %}
         <button class="footer-tab" data-toggle="collapse" data-target="#collapseExample-{{ answer.id }}"><i class="icon icon-share-alt"></i> 分享</button>
         {% if user.is_staff or user == answer.user %}
-{#            <form style="display: inline" action="{% url 'answers:delete' pk=answer.id %}" method="post">{% csrf_token %}#}
-{#                <button class="footer-tab" type="submit"><i class="icon icon-trash"></i> 删除</button>#}
-{#            </form>#}
+            <form style="display: inline" action="{% url 'answer_delete' pk=answer.id %}" method="post">{% csrf_token %}
+                <button class="footer-tab" type="submit"><i class="icon icon-trash"></i> 删除</button>
+            </form>
         {% endif %}
     </div>
 
@@ -62,22 +62,22 @@
         <div class="user-header">{{ answer.comments.count }}条评论</div>
 
         <div id="replyEditor-{{ answer.id }}" class="comment-editor" style="padding: 0 0 5px;" hidden>
-{#            <form style="display: flex" action="{% url 'comments:post_comment' pk=answer.id %}" method="post">#}
-{#                {% csrf_token %}#}
-{#                <textarea class="form-control" placeholder="评论" rows="1" name="content" required></textarea>#}
-{#                <input name="reply_id" value="" type="hidden">#}
-{#                <button class="Button Button-blue" style="margin-left: 10px; width: 80px;">评论</button>#}
-{#            </form>#}
+            <form style="display: flex" action="{% url 'comments_create' pk=answer.id %}" method="post">
+                {% csrf_token %}
+                <textarea class="form-control" placeholder="评论" rows="1" name="content" required></textarea>
+                <input name="reply_id" value="" type="hidden">
+                <button class="Button Button-blue" style="margin-left: 10px; width: 80px;">评论</button>
+            </form>
             <button class="footer-tab" onclick="cancelReply(this)" style="margin: 10px 0 0 0">&nbsp;&nbsp;&nbsp;取消</button>
         </div>
         <div id="comments-{{ answer.id }}"></div>
         <div class="comment-editor">
-{#            <form style="display: flex" action="{% url 'comments:post_comment' pk=answer.id %}" method="post">#}
-{#                {% csrf_token %}#}
-{#                <textarea class="form-control" placeholder="评论" rows="1" name="content" required></textarea>#}
-{#                <input name="reply_id" value="" type="hidden">#}
-{#                <button class="Button Button-blue" style="margin-left: 10px; width: 80px;">评论</button>#}
-{#            </form>#}
+            <form style="display: flex" action="{% url 'comments_create' pk=answer.id %}" method="post">
+                {% csrf_token %}
+                <textarea class="form-control" placeholder="评论" rows="1" name="content" required></textarea>
+                <input name="reply_id" value="" type="hidden">
+                <button class="Button Button-blue" style="margin-left: 10px; width: 80px;">评论</button>
+            </form>
         </div>
     </div>
 
