@@ -214,7 +214,7 @@ class Answer(models.Model):
     recent_modify_date = models.DateTimeField(default=timezone.now, verbose_name="修改时间")
     votesup = models.IntegerField(default=0,verbose_name="赞同")
     unvotes = models.IntegerField(default=0,verbose_name="反对")
-    question = models.ForeignKey("Question",verbose_name="回答",related_name="question")
+    question = models.ForeignKey("Question",verbose_name="回答",related_name="answers") #注意related_name
     status = models.BooleanField(default=True, verbose_name="有效标志")
     # 仅用于反向查找
     comment_list = GenericRelation("Comment",verbose_name="评论列表")

@@ -194,7 +194,7 @@ class CreateQuestionView(LoginRequiredMixin, generic.CreateView):
         topics = self.request.POST.get('topics_list', '')
         topics = topics.split(',')
         ask.add_topics(topics)
-        return redirect('asks:detail', pk=ask.id)
+        return redirect('question_detail', pk=ask.id)
 
     def form_invalid(self, form):
         #logger.error('提问题错误')
@@ -234,11 +234,12 @@ class QuestionDetailView(generic.FormView, generic.DetailView):
         collection_list = []
         self.object.click()
         page = request.GET.get('page', None)
+
         if page is None:
             context = self.get_context_data(**kwargs)
-            return self.render_to_response(context)
+            return self.render_to_response(context) #首次进入
 
-        answers_list = self.object.answers.order_by('-votes', '-create_time')
+        answers_list = self.object.answers.order_by('-votesup', '-created_date')
         paginator = Paginator(answers_list, 5)
         try:
             answers = paginator.page(page)
@@ -251,7 +252,7 @@ class QuestionDetailView(generic.FormView, generic.DetailView):
                 if self.request.user.is_collected(answer):
                     collection_list.append(answer)
         context = dict(answers=answers, vote_list=vote_list, collection_list=collection_list, is_ask_index=True)
-        return render(request, 'answerslist.html', context)
+        return render(request, 'answerslist.html', context)  #自定义渲染--下一页的答案
 
 
 class QuestionAnswerDetailView(generic.FormView, generic.DetailView):
@@ -264,7 +265,7 @@ class QuestionAnswerDetailView(generic.FormView, generic.DetailView):
         context = super(QuestionAnswerDetailView, self).get_context_data(**kwargs)
         asks = Question.objects.all().order_by('-created_date')[:5]
         topics_list = self.object.topics.all()
-        answer = self.object.question.filter(id=self.kwargs['answer_id']).first()
+        answer = self.object.answers.filter(id=int(self.kwargs['answer_id'])).first()
         vote_list = []
         collection_list = []
         if self.request.user.is_authenticated:
@@ -274,10 +275,11 @@ class QuestionAnswerDetailView(generic.FormView, generic.DetailView):
                 collection_list.append(answer)
         context['vote_list'] = vote_list
         context['collection_list'] = collection_list
-        context['answers'] = answer
+        context['answer'] = answer
         context['topics_list'] = topics_list
         context['asks'] = asks
         context['answer_view'] = True
+        #context['user'] = self.request.user
         self.object.click()
         return context
 
