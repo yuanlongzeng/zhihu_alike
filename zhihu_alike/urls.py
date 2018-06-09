@@ -52,6 +52,8 @@ urlpatterns = [
     url(r'^question/(?P<pk>.*)/createanswer$', genericview.CreateAnswerView.as_view(), name='question_create'),
     url(r'^question/(?P<pk>.*)/answer/(?P<answer_id>.*)$', genericview.QuestionAnswerDetailView.as_view(), name='question_answer_detail'),
     url(r'^question/(?P<pk>.*)/', genericview.QuestionDetailView.as_view(), name='question_detail'),
+    url(r'^questionfollow/(?P<pk>.*)$',genericview.follow_ask,name='answer_votedown'),
+    url(r'^questionunfollow/(?P<pk>.*)$',genericview.unfollow_ask,name='answer_votedown'),
 
 
 

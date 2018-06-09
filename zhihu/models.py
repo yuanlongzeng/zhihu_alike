@@ -105,17 +105,17 @@ class UserProfile(AbstractUser):
     def follow_ask(self, ask):
         if self.is_follow_ask(ask):
             return False
-        self.follow_asks.add(ask)
+        self.follow_questions.add(ask)
         return True
 
     def unfollow_ask(self, ask):
         if not self.is_follow_ask(ask):
             return False
-        self.follow_asks.remove(ask)
+        self.follow_questions.remove(ask)
         return True
 
     def is_follow_ask(self, ask):
-        return self.follow_asks.filter(id=ask.id).exists()
+        return self.follow_questions.filter(id=ask.id).exists()
 
 
 class Message(models.Model):
