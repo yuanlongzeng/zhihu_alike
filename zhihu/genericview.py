@@ -9,12 +9,29 @@ from zhihu.forms import AnswerForm
 from zhihu.models import Question, Answer, Comment
 
 
-class IndexView(generic.DetailView):
+# 首页功能：推（活跃用户）--拉模式、推荐
+class IndexView(LoginRequiredMixin, generic.DetailView):
     template_name = 'index.html'
 
     def get_object(self, queryset=None):
-        answers_list = Answer.objects.filter(status=True).order_by('-created_date')
-        paginator = Paginator(answers_list, 10)
+        union_list = []
+        paginator = ''
+        if self.request.user.is_active:
+            for follower in self.request.user.followings.all():
+                union_list.append(follower.answers.all())
+            #关注问题的所有回答  话题
+            for ask in self.request.user.follow_questions.all():
+                union_list.append(ask.answers.all())
+            answers_list = self.request.user.answer_set.all().union(*union_list).order_by('-created_date') #合并不重复qs
+            paginator = Paginator(answers_list, 10)
+        else:
+            #拉模式：sql查询
+            for follower in self.request.user.followings.all():
+                union_list.append(follower.answers.all())
+            for ask in self.request.user.follow_questions.all():
+                union_list.append(ask.answers.all())
+            answers_list = self.request.user.answer_set.all().union(*union_list).order_by('-created_date') #合并不重复qs
+            paginator = Paginator(answers_list, 10)
         return paginator
 
     def get_context_data(self, **kwargs):
@@ -24,7 +41,6 @@ class IndexView(generic.DetailView):
         collection_list = []
         context['asks'] = asks
         context['answers'] = self.object.page(1)
-        context['explore'] = True
         if self.request.user.is_authenticated:
             for answer in self.object.page(1):
                 if self.request.user.is_voted(answer):
@@ -49,12 +65,68 @@ class IndexView(generic.DetailView):
         except PageNotAnInteger or EmptyPage:
             return HttpResponseNotFound
         if self.request.user.is_authenticated:
+            for answer in answers:
+                if self.request.user.is_voted(answer):
+                    vote_list.append(answer)
+                if self.request.user.is_collected(answer):
+                    collection_list.append(answer)
+        context = dict(answers=answers, vote_list=vote_list, collection_list=collection_list)
+        return render(request, 'answerslist.html', context)
+
+    def handle_no_permission(self):
+        return redirect('explore')
+
+
+class ExploreView(generic.DetailView):
+    template_name = 'index.html'
+
+    def get_object(self, queryset=None):
+        answers_list = Answer.objects.filter(status=True).order_by('-created_date')
+        paginator = Paginator(answers_list, 10)
+        return paginator
+
+    def get_context_data(self, **kwargs):
+        context = super(ExploreView, self).get_context_data(**kwargs)
+        asks = Question.objects.all().order_by('-created_date')[:5]
+        vote_list = []
+        collection_list = []
+        #用户感兴趣的
+        context['asks'] = asks
+        context['answers'] = self.object.page(1)  #调用get_object回去数据
+        context['explore'] = True
+        if self.request.user.is_authenticated:
+            for answer in self.object.page(1):
+                if self.request.user.is_voted(answer):
+                    vote_list.append(answer)
+                if self.request.user.is_collected(answer):
+                    collection_list.append(answer)
+
+
+        context['vote_list'] = vote_list
+        context['collection_list'] = collection_list
+        return context
+
+    def get(self, request, *args, **kwargs):
+        super(ExploreView, self).get(request, *args, **kwargs)
+        page = request.GET.get('page', None)
+        if page is None:  #首次访问，取第一页的数据
+            context = self.get_context_data(**kwargs)
+            return self.render_to_response(context)
+        page = int(page)
+        vote_list = []
+        collection_list = []
+        try:
+            answers = self.object.page(page)
+        except PageNotAnInteger or EmptyPage:
+            return HttpResponseNotFound
+        if self.request.user.is_authenticated:
             for answer in self.object.page(page):
                 if self.request.user.is_voted(answer):
                     vote_list.append(answer)
                 if self.request.user.is_collected(answer):
                     collection_list.append(answer)
         context = dict(answers=answers, vote_list=vote_list, collection_list=collection_list)
+        #返回此页渲染的答案html
         return render(request, 'answerslist.html', context)
 
 class ShowAnswerView(generic.DetailView):
@@ -387,3 +459,5 @@ class DeleteAnswerView(LoginRequiredMixin, generic.DeleteView):
         answer.status = False
         answer.save()
         return HttpResponseRedirect(success_url)
+
+

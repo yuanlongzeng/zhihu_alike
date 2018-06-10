@@ -41,7 +41,7 @@
                                 </div>
                             </div>
                         </div>
-                        {% if ask in user.follow_asks.all %}
+                        {% if ask in user.follow_questions.all %}
                             <button class="Button Button-blue" onclick="followAsk(this, {{ ask.id }})" style="margin-left: 0" hidden>关注问题</button>
                             <button class="Button Button-grey" onclick="unfollowAsk(this, {{ ask.id }})" onmouseenter="enter(this)" onmouseleave="leave(this)" style="margin-left: 0;width: 90px">已关注</button>
                         {% else %}
