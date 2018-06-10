@@ -61,7 +61,7 @@ function register() {
             }
             if (data.errors.nickname) {
                 $('#register-input-3').addClass('has-error');
-                $('#register-message-3').text(data.errors.nickname[0]);
+                $('#register-message-3').text(data.errors.nick_name[0]);
             }
             if (data.errors.password1) {
                 $('#register-input-4').addClass('has-error');

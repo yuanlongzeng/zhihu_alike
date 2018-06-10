@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.backends import ModelBackend
+from django.contrib.auth.hashers import make_password
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
@@ -17,8 +18,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 
 from zhihu.models import UserProfile, Comment, Topic
-from .forms import LoginForm
-
+from .forms import LoginForm, RegisterForm
 
 
 class Index(View):
@@ -79,7 +79,36 @@ class Logout(View):
         return HttpResponseRedirect(reverse("index"))
 
 
+class RegisterView(View):
 
+    def post(self,request):
+        data = dict()
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            #user = form.save()
+            user = UserProfile()
+            user.username = request.POST.get("username","")
+            user.nick_name = request.POST.get("nick_name", "")
+            user.email = request.POST.get("email","")
+
+            user.mobile = user.email
+
+            user.status = False  # 未激活 #和is_active重复了
+
+            # 加密password进行保存
+            password = request.POST.get("password1")
+            user.password = make_password(password)
+            user.save()
+            login(request, user)
+            #logger.info('register: {}'.format(user))
+            data['ok'] = True
+        else:
+            data['ok'] = False
+            data['errors'] = form.errors
+        return JsonResponse(data, status=200)
+    def get(self,request):
+        form = RegisterForm()
+        return render(request, 'register.html', {'form': form})
 ############3DRF################
 
 #所有用户可以看到的，未登录时也是跳转到这

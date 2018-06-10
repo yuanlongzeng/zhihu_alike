@@ -20,7 +20,7 @@ from django.views.static import serve
 
 from rest_framework.routers import DefaultRouter
 
-from zhihu.views import Index,Login,Logout,AnswerListViewSet,QuestionListViewSet,CommentViewSet,TopicViewSet
+from zhihu.views import Index,Login,Logout,AnswerListViewSet,QuestionListViewSet,CommentViewSet,TopicViewSet,RegisterView
 from zhihu import genericview
 import xadmin
 router = DefaultRouter()
@@ -39,6 +39,7 @@ urlpatterns = [
     url(r'^$',Index.as_view(),name="index"),
     url(r'^login/$',Login.as_view(),name="login"),
     url(r'^logout/$',Logout.as_view(),name="logout"),
+    url(r'^register/$',RegisterView.as_view(),name="register"),
 
     url(r'^userdetail/(?P<pk>.*)$',genericview.IndexView.as_view(),name='user_detail'),
     url(r'^explore/$',genericview.IndexView.as_view(),name='explore'),
