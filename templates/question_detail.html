@@ -151,7 +151,7 @@
             <div class="card-header">其他问题</div>
             {% for ask in asks %}
                 <div class="card-list">
-{#                    <a href="{% url 'asks:detail' ask.id %}">{{ ask.title }}</a>#}
+                    <a href="{% url 'question_detail' ask.id %}">{{ ask.title }}</a>
                 </div>
             {% endfor %}
         </div>

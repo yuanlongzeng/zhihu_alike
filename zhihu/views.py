@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
 
 # Create your views here.
@@ -58,15 +58,18 @@ class Login(View):
             # 成功返回user对象,失败返回null
             user = authenticate(username=user_name, password=pass_word)
 
+            data = dict()
             if user is not None:
-                # 实际是对request写了一部分东西进去，然后在render的时候：
-                # request是要render回去的。这些信息也就
-                login(request, user)
-                #应该加个从哪个页面跳转过来的从而好跳转回去
-                return HttpResponseRedirect(reverse("index"))
-                # return render(request, "users/index.html")
+                if user.status == True:
+                    login(request, user)
+                    data['ok'] = True
+                else:
+                    data['ok'] = False
+                    data['message'] = '用户未激活'
             else:
-                return render(request, "login.html", {"msg": "用户名或密码错误,请重试", "login_form": login_form})
+                data['ok'] = False
+                data['message'] = '用户名或密码错误'
+            return JsonResponse(data, status=200)
         else:
             return render(request, "login.html", {"login_form": login_form})
 
