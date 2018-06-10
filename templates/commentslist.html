@@ -4,7 +4,9 @@
         <div class="commentItem-meta">
         <span>
             <img src="{{ MEDIA_URL }}{{ comment.user.get_image_url }}" class="img-rounded" width="24px" height="24px">
-{#            <a style="color: black" href="{% url 'users:detail' comment.user.id %}">{{ comment.user.nick_name }}</a>#}
+            <a style="color: black"
+{#               href="{% url 'users:detail' comment.user.id %}"#}
+            >{{ comment.user.nick_name }}</a>
             {% if comment.reply_to %}
                 <span style="color: #8590a6">&nbsp;回复&nbsp;</span>
                 <a style="color: black"
@@ -16,7 +18,7 @@
         </div>
         <div class="commentItem-content">{{ comment.content }}</div>
 
-        <button class="footer-tab reply-btn" onclick="reply(this, {{ comment.answer.id }}, {{ comment.id }})" style="margin: 0">
+        <button class="footer-tab reply-btn" onclick="reply(this, {{ comment.content_object.id }}, {{ comment.id }})" style="margin: 0">
             <i class="icon icon-share-alt"></i> 回复
         </button>
         {% if user.is_staff or user == comment.user or user == answer.user %}

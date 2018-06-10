@@ -154,6 +154,9 @@ class Comment(models.Model):
     def __str__(self):
         return self.content[:10]
 
+    def answer(self):
+        return self.content_object.filter()
+
 
 class Question(models.Model):
     #可以追溯所有的修改者

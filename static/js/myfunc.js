@@ -168,7 +168,7 @@ function uncollect(x, id) {
 }
 
 function followAsk(x, id) {
-    let link = '/asksfollow/' + id;
+    let link = '/questionfollow/' + id;
     let headers = new Headers();
     headers.append('X-CSRFToken', getCookie('csrftoken'));
     fetch(link, {
@@ -191,7 +191,7 @@ function followAsk(x, id) {
 }
 
 function unfollowAsk(x, id) {
-    let link = '/asksunfollow/' + id;
+    let link = '/questionunfollow/' + id;
     let headers = new Headers();
     headers.append('X-CSRFToken', getCookie('csrftoken'));
     fetch(link, {
