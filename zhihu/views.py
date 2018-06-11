@@ -286,6 +286,6 @@ def usertest(request):
 
 class userfloatbox(View):
     def get(self,request):
-        data = request.GET.get('userid',1)
-        user = {"nick_name":'dazahui'}
-        return render(request,"userfloatbox.html",user)
+        userid = request.GET.get('userid',1)
+        user = UserProfile.objects.get(id=int(userid))
+        return render(request,"userfloatbox.html",{"user":user})
