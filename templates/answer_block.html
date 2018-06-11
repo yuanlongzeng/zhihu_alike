@@ -5,11 +5,16 @@
     </div>
 {% endif %}
     <div class="answer-card-header">
-        <img src="{{ MEDIA_URL }}{{ answer.user.get_image_url }}" class="img-rounded" width="38px"
-             height="38px">
+       <div class="face"  id="userfloatbox-{{ answer.user.id }}" ajax-href="{% url 'userfloatbox' %}" ajax-data="userid={{ answer.user.id }}">
+           <img src="{{ MEDIA_URL }}{{ answer.user.get_image_url }}" class="img-rounded" width="38px" height="38px"></div>
+{#        <div class="user-info">#}
+{#            <a href="{% url 'user_detail' answer.user.id %}" class="user-name">{{ answer.user.nick_name }}</a>#}
+{#            <div class="user-intro">{{ answer.user.desc }}</div>#}
+{#        </div>#}
+
         <div class="user-info">
             <a href="{% url 'user_detail' answer.user.id %}" class="user-name">{{ answer.user.nick_name }}</a>
-            <div class="user-intro">{{ answer.user.desc }}</div>
+            <div class="user-info">{{ answer.user.desc }}</div>
         </div>
     </div>
     {% if answer_view is True or answer.content|length < 180 %}

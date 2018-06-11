@@ -278,3 +278,14 @@ class TopicViewSet(mixins.ListModelMixin,mixins.RetrieveModelMixin,mixins.Update
         #不真正删除
         instance.status = False
         instance.save()
+
+
+def usertest(request):
+    data = {"userid":1}
+    return render(request,"usertest.html",context=data)
+
+class userfloatbox(View):
+    def get(self,request):
+        data = request.GET.get('userid',1)
+        user = {"nick_name":'dazahui'}
+        return render(request,"userfloatbox.html",user)
