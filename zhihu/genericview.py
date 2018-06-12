@@ -3,10 +3,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import PageNotAnInteger, EmptyPage, Paginator
 from django.http import HttpResponseNotFound, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
-from django.views import generic
+from django.views import generic, View
 
 from zhihu.forms import AnswerForm
-from zhihu.models import Question, Answer, Comment
+from zhihu.models import Question, Answer, Comment, UserProfile
 
 
 # 首页功能：推（活跃用户）--拉模式、推荐
@@ -18,7 +18,7 @@ class IndexView(LoginRequiredMixin, generic.DetailView):
         paginator = ''
         if self.request.user.is_active:
             for follower in self.request.user.followings.all():
-                union_list.append(follower.answers.all())
+                union_list.append(follower.answer_set.all())
             #关注问题的所有回答  话题
             for ask in self.request.user.follow_questions.all():
                 union_list.append(ask.answers.all())
@@ -75,6 +75,17 @@ class IndexView(LoginRequiredMixin, generic.DetailView):
 
     def handle_no_permission(self):
         return redirect('explore')
+class FollowUserView(LoginRequiredMixin,View):
+    def get(self,request,userid):
+        data = dict(r=0)
+        user = UserProfile.objects.get(id=int(userid))
+        if request.user.is_following(user):
+            request.user.unfollow(user.id)
+        else:
+            request.user.follow(user.id)
+            data['r'] = 1
+        return JsonResponse(data)
+
 
 
 class ExploreView(generic.DetailView):

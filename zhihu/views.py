@@ -286,6 +286,10 @@ def usertest(request):
 
 class userfloatbox(View):
     def get(self,request):
+        followed = False
         userid = request.GET.get('userid',1)
         user = UserProfile.objects.get(id=int(userid))
-        return render(request,"userfloatbox.html",{"user":user})
+        if request.user.is_authenticated:
+            if request.user.is_following(user):
+                followed = True
+        return render(request,"userfloatbox.html",{"user":user,"followed":followed})

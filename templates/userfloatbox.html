@@ -86,7 +86,12 @@
 
                 </tbody>
             </table>
-            <button type="button" class="btn btn-default">关注{% if user.gender == "M" %}他 {% else %}她{% endif %}
+            <button id="followuser" type="submit" onclick="followuser(this,{{ user.id }})" class="btn btn-default">
+                {% if followed %}
+                    已关注
+                {% else %}
+                    关注{% if user.gender == "M" %}他 {% else %}她{% endif %}
+                {% endif %}
             </button>
             <button type="button" class="btn btn-default">发私信</button>
         </div>
@@ -94,3 +99,23 @@
     </div>
 </div>
 </div>
+
+<script type="text/javascript">
+
+    function followuser(x,userid) {
+        console.log(userid);
+        let link = '/userfollow/'+userid ;
+    fetch(link, {
+        method: 'GET',
+        credentials: 'include'
+    }).then(response => response.json()
+    ).then(data => {
+        if (!data.r) {
+            $(x).text("关注{% if user.gender == "M" %}他{% else %}她{% endif %}");
+
+        } else {
+             $(x).text("已关注")
+        }
+    });
+    }
+</script>
