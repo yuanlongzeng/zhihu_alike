@@ -20,7 +20,7 @@ from django.views.static import serve
 
 from rest_framework.routers import DefaultRouter
 
-from zhihu.views import Index,Login,Logout,AnswerListViewSet,QuestionListViewSet,CommentViewSet,TopicViewSet,RegisterView
+from zhihu.views import Index,Login,Logout,AnswerListViewSet,QuestionListViewSet,CommentViewSet,TopicViewSet,RegisterView,usertest,userfloatbox
 from zhihu import genericview
 import xadmin
 router = DefaultRouter()
@@ -36,13 +36,17 @@ urlpatterns = [
     url(r'^captcha/', include('captcha.urls')),
 
     #自定义视图
-    url(r'^$',Index.as_view(),name="index"),
+    url(r'^$',genericview.IndexView.as_view(),name="index"),
     url(r'^login/$',Login.as_view(),name="login"),
     url(r'^logout/$',Logout.as_view(),name="logout"),
     url(r'^register/$',RegisterView.as_view(),name="register"),
 
+    url(r'^usertest/',usertest,name='usertest'),
+    url(r'^userfloatbox/',userfloatbox.as_view(),name='userfloatbox'),
+    url(r'^userfollow/(?P<userid>.*)$',genericview.FollowUserView.as_view(),name='userfollow'),
+
     url(r'^userdetail/(?P<pk>.*)$',genericview.IndexView.as_view(),name='user_detail'),
-    url(r'^explore/$',genericview.IndexView.as_view(),name='explore'),
+    url(r'^explore/$',genericview.ExploreView.as_view(),name='explore'),
 
     #answer
     url(r'^answercontent/(?P<pk>.*)$',genericview.ShowAnswerView.as_view(),name='answer_content'),
