@@ -24,7 +24,8 @@ class UserProfile(AbstractUser):
     #尽量正向查询，否则会做不必要的查询  所以这些关系filed应放在查询比较多的表上
 
    #当定义模型通过中间模型与其自身产生的多对多关系时，你必须使用参数symmetrical=False
-    followings = models.ManyToManyField('self', related_name='funs', symmetrical=False,blank=True,null=True, verbose_name='关注')  #关注者--
+    followings = models.ManyToManyField('self', related_name='funs', symmetrical=False,blank=True,null=True, verbose_name='关注')  #关注了--followee
+    followers = models.ManyToManyField('self', related_name='follower', symmetrical=False,blank=True,null=True, verbose_name='关注者')
     vote_answers = models.ManyToManyField("Answer", related_name='vote_user', blank=True,null=True, verbose_name='点赞答案')
     unvote_answers = models.ManyToManyField("Answer", related_name='unvote_user', blank=True,null=True, verbose_name='反对答案')
     collections = models.ManyToManyField("Answer", related_name='collection_user', blank=True,null=True, verbose_name='收藏')  #不知回答-，文章等
@@ -101,6 +102,26 @@ class UserProfile(AbstractUser):
             return True
     def is_following(self, user):
         return self.followings.filter(id=user.id).exists()
+
+    def follower(self, user_id):
+        try:
+            follow_user = UserProfile.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return False
+        if self.id != follow_user.id and not self.is_follower(follow_user):
+            self.followers.add(follow_user)
+            return True
+
+    def unfollower(self, user_id):
+        try:
+            follow_user = UserProfile.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return False
+        if self.is_follower(follow_user):
+            self.followers.remove(follow_user)
+            return True
+    def is_follower(self, user):
+        return self.followers.filter(id=user.id).exists()
 
     def follow_ask(self, ask):
         if self.is_follow_ask(ask):

@@ -81,8 +81,11 @@ class FollowUserView(LoginRequiredMixin,View):
         user = UserProfile.objects.get(id=int(userid))
         if request.user.is_following(user):
             request.user.unfollow(user.id)
+            if user.is_follower(request.user):
+                user.unfollower(request.user.id)
         else:
             request.user.follow(user.id)
+            user.follower(request.user.id)
             data['r'] = 1
         return JsonResponse(data)
 
