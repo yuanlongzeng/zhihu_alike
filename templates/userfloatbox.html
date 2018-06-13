@@ -45,11 +45,10 @@
 
 <div class="container">
     <div class="row clearfix">
-        <div class="col-md-4 column">
+        <div style="width: 250px;height: 170px">
             <table class="table table-condensed">
                 <div class="answer-card-header">
-                    <img src="{{ MEDIA_URL }}{{ user.get_image_url }}" class="img-rounded" width="38px"
-                         height="38px">
+                    <img src="{{ MEDIA_URL }}{{ user.get_image_url }}" class="img-rounded" height="15" width="15">
                     <div class="user-info">
                         <a href="{% url 'user_detail' user.id %}"
                            class="user-name">{{ user.nick_name }}</a>
