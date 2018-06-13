@@ -184,7 +184,7 @@ class Question(models.Model):
     creator = models.ForeignKey(UserProfile,related_name="creator",verbose_name="提问者")  #停用、拉黑--删除
     editor = models.ForeignKey(UserProfile,related_name="edior",verbose_name="编辑者")  #反向查询：不能同时使用默认的表名  默认名是userprofile_set
     title = models.CharField(max_length=100,verbose_name="标题")
-    topics = models.ManyToManyField("Topic",blank=True,related_name="topics",verbose_name="话题")
+    topics = models.ManyToManyField("Topic",blank=True,related_name="questions",verbose_name="话题")
     content = models.TextField(verbose_name="内容")
     clicks = models.IntegerField(default=0,verbose_name="点击数")
     created_date = models.DateTimeField(default=timezone.now,verbose_name="创建时间")

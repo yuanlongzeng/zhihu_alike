@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect
 from django.views import generic, View
 
 from zhihu.forms import AnswerForm
-from zhihu.models import Question, Answer, Comment, UserProfile
+from zhihu.models import Question, Answer, Comment, UserProfile, Topic
 
 
 # 首页功能：推（活跃用户）--拉模式、推荐
@@ -475,3 +475,55 @@ class DeleteAnswerView(LoginRequiredMixin, generic.DeleteView):
         return HttpResponseRedirect(success_url)
 
 
+#话题topics
+class TopicsView(generic.ListView):
+    model = Topic
+    template_name = 'topics.html'
+    context_object_name = 'topics'
+
+class TopicDetail(generic.DetailView):
+    model = Topic
+    template_name = "index.html"
+    context_object_name = "topic"
+
+    def get_paginator(self):
+        answers = []
+        for question in self.object.questions.all():
+            answers.append(question.answers.all())
+        if len(answers) < 1:
+            return None
+        answers_list = answers[0].union(*answers[1:])
+        paginator = Paginator(answers_list,10)
+        return paginator
+    def get_context_data(self, **kwargs):
+        context = super(TopicDetail, self).get_context_data(**kwargs)
+        questions = Question.objects.order_by("-created_date")[:5]
+        paginator = self.get_paginator()
+        if self.request.user.is_authenticated:
+            vote_list = []
+            for answer in paginator.page(1):
+                if self.request.user.is_voted(answer):
+                    vote_list.append(answer)
+        context["answers"] = paginator.page(1)
+        context["asks"] = questions
+        return context
+
+    def get(self, request, *args, **kwargs):
+        super(TopicDetail, self).get(request, *args, **kwargs)
+        page = request.GET.get('page',None)
+        if page is None:
+            context = self.get_context_data(**kwargs)
+            return self.render_to_response(context)
+        vote_list = []
+
+        try:
+            answers = self.get_paginator().page(int(page))
+        except PageNotAnInteger or EmptyPage:
+            return HttpResponseNotFound
+        if self.request.user.is_authenticated:
+            vote_list = []
+            for answer in answers:
+                if self.request.user.is_voted(answer):
+                    vote_list.append(answer)
+        context = dict(answers=answers,vote_list=vote_list,topic=True)
+        return render(request,"answerslist.html",context)

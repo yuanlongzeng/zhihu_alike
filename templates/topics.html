@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block main %}
+    <div class="card" style="padding: 10px">
+        {% for topic in topics %}
+             <a class="ask-topic" href="{% url 'topic_detail' topic.id %}">{{ topic.name }}</a>
+        {% endfor %}
+    </div>
+{% endblock %}

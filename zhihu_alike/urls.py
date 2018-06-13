@@ -66,13 +66,15 @@ urlpatterns = [
     url(r'^answercollect/(?P<pk>.*)$',genericview.collect,name='answer_collect'),
     url(r'^answeruncollect/(?P<pk>.*)$',genericview.uncollect,name='answer_uncollect'),
 
-    # topic
-    url(r'^topicdetail/(?P<pk>.*)$', genericview.ShowAnswerView.as_view(), name='topic_detail'),
 
     #comment
     url(r'^commentslist/(?P<pk>.*)$',genericview.CommentsListView.as_view(),name='comments_list'),
     url(r'^commentsdelete/(?P<pk>.*)$',genericview.DeleteCommentView.as_view(),name='comments_delete'),
     url(r'^commentscreate/(?P<pk>.*)$',genericview.CommentCreateView.as_view(),name='comments_create'),
+
+    #topics
+    url(r'^topics/$',genericview.TopicsView.as_view(),name='topics_list'),
+    url(r'^topics/(?P<pk>.*)$',genericview.TopicDetail.as_view(),name='topic_detail'),
 
     url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),  # 静态文件加载，media文件
 
