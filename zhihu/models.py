@@ -30,6 +30,7 @@ class UserProfile(AbstractUser):
     unvote_answers = models.ManyToManyField("Answer", related_name='unvote_user', blank=True,null=True, verbose_name='反对答案')
     collections = models.ManyToManyField("Answer", related_name='collection_user', blank=True,null=True, verbose_name='收藏')  #不知回答-，文章等
     follow_questions = models.ManyToManyField("Question", related_name='followers', blank=True,null=True, verbose_name='关注问题')
+    follow_topics = models.ManyToManyField("Topic",related_name="user",blank=True,null=True,verbose_name="关注换题")
 
 
     def __str__(self):
