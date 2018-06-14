@@ -20,6 +20,9 @@ class IndexView(LoginRequiredMixin, generic.DetailView):
             for follower in self.request.user.followings.all():
                 union_list.append(follower.answer_set.all())
             #关注问题的所有回答  话题
+            for topic in self.request.user.follow_topics.all():
+                for question in topic.questions.all():
+                    union_list.append(question.answers.all())
             for ask in self.request.user.follow_questions.all():
                 union_list.append(ask.answers.all())
             answers_list = self.request.user.answer_set.all().union(*union_list).order_by('-created_date') #合并不重复qs
