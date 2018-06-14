@@ -504,6 +504,9 @@ class TopicDetail(generic.DetailView):
             for answer in paginator.page(1):
                 if self.request.user.is_voted(answer):
                     vote_list.append(answer)
+            if self.request.user.follow_topics.filter(id=self.object.id).exists():
+                context['followed'] = True
+
         context["answers"] = paginator.page(1)
         context["asks"] = questions
         return context
@@ -527,3 +530,15 @@ class TopicDetail(generic.DetailView):
                     vote_list.append(answer)
         context = dict(answers=answers,vote_list=vote_list,topic=True)
         return render(request,"answerslist.html",context)
+
+class TopicFollowView(View):
+    def get(self,request,pk):
+        topic_id = request.GET.get('pk')
+        topic = Topic.objects.get(pk=int(pk))
+        data = dict(r=1)
+        if request.user.is_follow_topic(topic):
+            request.user.unfollow_topic(topic)
+            data['r'] = 0
+        else:
+            request.user.follow_topic(topic)
+        return JsonResponse(data, status=201)

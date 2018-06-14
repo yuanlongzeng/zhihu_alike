@@ -4,10 +4,33 @@
     {% if topic %}
         <div class="card">
             <div class="col-xs-4" style="max-width: 200px">
-                <img src="https://i.loli.net/2018/04/21/5adb52d71941e.jpg" class="img-rounded" width="100px" height="100px" style="margin: 10px 0">
+                <img src="https://i.loli.net/2018/04/21/5adb52d71941e.jpg" class="img-rounded" width="100px"
+                     height="100px" style="margin: 10px 0">
             </div>
             <div class="col-xs-8" style="margin-top: 30px">
-                <h1>{{ topic.name }}</h1>
+                <table>
+                    <tr>
+                        <td>
+                            <h1>{{ topic.name }}</h1>
+                        </td>
+                        <td class="margin-left:10px">
+                            {% if request.user.is_authenticated %}
+                                <button class="btn btn-default" type="submit"
+                                        onclick="followtopic(this,{{ topic.id }})">
+                                    {% if followed %}已关注 {% else %} 关注{% endif %}
+                                </button>
+                            {% else %}
+                                <button class="Button Button-white" type="submit" data-toggle="modal"
+                                        data-target="#loginModal">关注
+                                </button>
+                            {% endif %}
+
+                        </td>
+                    </tr>
+
+                </table>
+
+
             </div>
         </div>
     {% endif %}
@@ -16,7 +39,9 @@
             {% include "answer_block.html" %}
         {% endfor %}
         {% if answers.has_next %}
-            <button class="Button Button-white get-more" onclick="answersMore(this, {{ answers.next_page_number }})">更多</button>
+            <button class="Button Button-white get-more" onclick="answersMore(this, {{ answers.next_page_number }})">
+                更多
+            </button>
         {% endif %}
     </div>
 {% endblock %}
@@ -26,7 +51,7 @@
         <div class="card-header">
             最新问题
         </div>
-        {% for ask in asks%}
+        {% for ask in asks %}
             <div class="card-list">
                 <a href="{% url 'question_detail' ask.id %}">{{ ask.title }}</a>
             </div>
@@ -39,31 +64,48 @@
 
     <script>
         function answersMore(x, page) {
-        let link = '{% if explore %}{% url 'explore' %}{% elif topic %}{% url 'topic_detail' topic.id %}{% else %}{% url 'index' %}{% endif %}' + '?page=' + page;
-        $(x).html('<i class="icon icon-spin icon-spinner-snake"></i> 加载中...');
-        fetch(link, {
-            method: 'GET',
-            credentials: 'include'
-        }).then(response => {
-            if (response.ok) {
-                return response.text();
-            } else {
-                throw new Error('404!')
-            }
-        }).then(data => {
-            $('#answers-list').append(data);
-            $(x).hide();
+            let link = '{% if explore %}{% url 'explore' %}{% elif topic %}{% url 'topic_detail' topic.id %}{% else %}{% url 'index' %}{% endif %}' + '?page=' + page;
+            $(x).html('<i class="icon icon-spin icon-spinner-snake"></i> 加载中...');
+            fetch(link, {
+                method: 'GET',
+                credentials: 'include'
+            }).then(response => {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    throw new Error('404!')
+                }
+            }).then(data => {
+                $('#answers-list').append(data);
+                $(x).hide();
+                $('div[id^=userfloatbox-]').each(function () {
+                    $(this).pinwheel();
+                })
+            }).catch(e => console.log(e));
+        }
+
+        $(document).ready(function () {
             $('div[id^=userfloatbox-]').each(function () {
-                 $(this).pinwheel();
-               })
-        }).catch(e => console.log(e));
-    }
+                $(this).pinwheel();
+            })
 
-    $(document).ready(function(){
-	$('div[id^=userfloatbox-]').each(function () {
-        $(this).pinwheel();
-    })
+        });
 
-});
+        function followtopic(bth, id) {
+            let link = "{% url 'topic_follow' topic.id %}";
+
+            fetch(link, {
+                method: 'GET',
+                credentials: 'include'
+            }).then(response => response.json()
+            ).then(data => {
+                if (!data.r) {
+                    $(bth).text("关注");
+
+                } else {
+                    $(bth).text("已关注")
+                }
+            });
+        }
     </script>
 {% endblock %}

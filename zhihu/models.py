@@ -138,6 +138,21 @@ class UserProfile(AbstractUser):
 
     def is_follow_ask(self, ask):
         return self.follow_questions.filter(id=ask.id).exists()
+    #话题
+    def follow_topic(self, topic):
+        if self.is_follow_topic(topic):
+            return False
+        self.follow_topics.add(topic)
+        return True
+
+    def unfollow_topic(self, topic):
+        if not self.is_follow_topic(topic):
+            return False
+        self.follow_topics.remove(topic)
+        return True
+
+    def is_follow_topic(self, topic):
+        return self.follow_topics.filter(id=topic.id).exists()
 
 
 class Message(models.Model):

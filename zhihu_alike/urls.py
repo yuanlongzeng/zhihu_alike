@@ -75,6 +75,7 @@ urlpatterns = [
     #topics
     url(r'^topics/$',genericview.TopicsView.as_view(),name='topics_list'),
     url(r'^topics/(?P<pk>.*)$',genericview.TopicDetail.as_view(),name='topic_detail'),
+    url(r'^topic_follow/(?P<pk>.*)$',genericview.TopicFollowView.as_view(),name='topic_follow'),
 
     url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),  # 静态文件加载，media文件
 
