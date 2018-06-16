@@ -51,7 +51,7 @@ class UserProfile(AbstractUser):
             return url.format(id=image_id)
         else:
             return self.photo
-
+    #点赞
     def voteup(self, answer):
         if self.is_voted(answer):
             return False
@@ -68,6 +68,24 @@ class UserProfile(AbstractUser):
 
     def is_voted(self, answer):
         return self.vote_answers.filter(id=answer.id).exists()
+
+    #点踩
+    def un_voteup(self, answer):
+        if self.un_is_voted(answer):
+            return False
+        self.unvote_answers.add(answer)
+        answer.un_voteup()
+        return True
+
+    def un_votedown(self, answer):
+        if not self.un_is_voted(answer):
+            return False
+        self.unvote_answers.remove(answer)
+        answer.un_votedown()
+        return True
+
+    def un_is_voted(self, answer):
+        return self.unvote_answers.filter(id=answer.id).exists()
     #收藏相关
     def collect(self, answer):
         if self.is_collected(answer):
@@ -276,6 +294,14 @@ class Answer(models.Model):
 
     def votedown(self):
         self.votesup -= 1
+        self.save()
+
+    def un_voteup(self):
+        self.unvotes += 1
+        self.save()
+
+    def un_votedown(self):
+        self.unvotes -= 1
         self.save()
 
     def comment_cnt(self):
