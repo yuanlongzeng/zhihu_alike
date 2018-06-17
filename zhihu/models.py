@@ -16,7 +16,7 @@ class UserProfile(AbstractUser):
     gender = models.CharField(max_length=2,choices=(("F","女"),("M","男")),default="M",verbose_name="性别")
     desc = models.CharField(max_length=200,verbose_name="简介")
     email = models.EmailField(max_length=64, unique=True, verbose_name='邮箱')
-    mobile = models.CharField(max_length=11,unique=True,verbose_name="手机号")
+    mobile = models.CharField(max_length=11,blank="",verbose_name="手机号")
     photo = models.ImageField(upload_to="media/%Y/%m/%d/",verbose_name="头像",default="media/1.jpg")  #头像路径
     user_type = models.CharField(max_length=10,choices=(("gr","个人"),("org","机构")),default="gr",verbose_name="类别")  #机构需审核
     user_status = models.CharField(max_length=10,choices=(("normal","正常"),("stop","停用"),("delete","删除")),verbose_name="用户状态",default="normal")  #用户状态

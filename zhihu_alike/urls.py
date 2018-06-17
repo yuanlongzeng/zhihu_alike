@@ -36,7 +36,7 @@ urlpatterns = [
     url(r'^captcha/', include('captcha.urls')),
 
     #自定义视图
-    url(r'^$',genericview.IndexView.as_view(),name="index"),
+    url(r'^index/$',genericview.IndexView.as_view(),name="index"),
     url(r'^login/$',Login.as_view(),name="login"),
     url(r'^logout/$',Logout.as_view(),name="logout"),
     url(r'^register/$',RegisterView.as_view(),name="register"),
@@ -78,8 +78,9 @@ urlpatterns = [
     url(r'^topic_follow/(?P<pk>.*)$',genericview.TopicFollowView.as_view(),name='topic_follow'),
 
     url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),  # 静态文件加载，media文件
-
-    #api
+    #第三方登录验证
+    url('', include('social_django.urls', namespace='social')),
+    #rest api
     url(r'^', include(router.urls)),
 
 

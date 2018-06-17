@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     'corsheaders',
     'rest_framework',
+    'social_django'
 ]
 
 MIDDLEWARE = [
@@ -73,6 +74,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -140,7 +143,11 @@ AUTH_USER_MODEL = 'zhihu.UserProfile'
 
 #自定义用户登录验证
 AUTHENTICATION_BACKENDS = (
+    'social_core.backends.weibo.WeiboOAuth2',
+    'social_core.backends.qq.QQOAuth2',
+    'social_core.backends.github.GithubOAuth2',
     "zhihu.views.CustomAuth",
+    'django.contrib.auth.backends.ModelBackend',#这是检测Django用户数据库的基本认证方案。按照 AUTHENTICATION_BACKENDS 的排列顺序，如果同样的用户名和密码在第一次就匹配了，那么Django将停止处理后面的东西。
 )
 
 
@@ -184,3 +191,13 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR,'static'),]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR,'media')
+
+#第三方登录配置
+SOCIAL_AUTH_WEIBO_KEY = 'foobar'
+SOCIAL_AUTH_WEIBO_SECRET = 'bazqux'
+
+SOCIAL_AUTH_GITHUB_KEY = 'c6a388e7c5cca36b75e4'
+SOCIAL_AUTH_GITHUB_SECRET = 'c18384c0f35127bf34b8c897c4d289faf055c471'
+
+#授权成功后跳转页面
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/index/'
