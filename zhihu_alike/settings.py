@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,7 +46,8 @@ INSTALLED_APPS = [
     "crispy_forms",
     'corsheaders',
     'rest_framework',
-    'social_django'
+    'social_django',
+
 ]
 
 MIDDLEWARE = [
@@ -201,3 +203,25 @@ SOCIAL_AUTH_GITHUB_SECRET = 'c18384c0f35127bf34b8c897c4d289faf055c471'
 
 #授权成功后跳转页面
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/index/'
+
+
+#channels相关配置
+#Redis信息
+REDIS_OPTIONS = {
+    'HOST': '192.168.200.127',
+    'PORT': 6379,
+    'PASSWD': '123456',
+    'DB': 0
+}
+#使用Redis作为消息存储，需安装asgi_redis
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'asgi_redis.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': ['redis://:{0}@{1}:{2}/{3}'.format(REDIS_OPTIONS['PASSWD'], REDIS_OPTIONS['HOST'], REDIS_OPTIONS['PORT'], 1)]
+        },
+
+    }
+}
+#Redis频道和Channels群组名
+GROUP_NAME = 'msg_push'
