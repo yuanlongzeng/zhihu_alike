@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'channels',
+    'zhihu.apps.ZhihuConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
-    'zhihu.apps.ZhihuConfig',
+
     "captcha",
     "xadmin",
     "crispy_forms",
@@ -209,6 +210,7 @@ SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/index/'
 #Redis信息
 REDIS_OPTIONS = {
     'HOST': '192.168.200.127',
+    # 'HOST': '127.0.0.1',
     'PORT': 6379,
     'PASSWD': '123456',
     'DB': 0
@@ -217,6 +219,7 @@ REDIS_OPTIONS = {
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'asgi_redis.RedisChannelLayer',
+        #'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
             'hosts': ['redis://:{0}@{1}:{2}/{3}'.format(REDIS_OPTIONS['PASSWD'], REDIS_OPTIONS['HOST'], REDIS_OPTIONS['PORT'], 1)]
         },
@@ -225,3 +228,5 @@ CHANNEL_LAYERS = {
 }
 #Redis频道和Channels群组名
 GROUP_NAME = 'msg_push'
+
+ASGI_APPLICATION = 'zhihu_alike.routing.application'

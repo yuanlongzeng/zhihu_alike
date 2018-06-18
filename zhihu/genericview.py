@@ -8,7 +8,6 @@ from django.views import generic, View
 from zhihu.forms import AnswerForm
 from zhihu.models import Question, Answer, Comment, UserProfile, Topic
 
-
 # 首页功能：推（活跃用户）--拉模式、推荐
 class IndexView(LoginRequiredMixin, generic.DetailView):
     template_name = 'index.html'
@@ -545,3 +544,8 @@ class TopicFollowView(View):
         else:
             request.user.follow_topic(topic)
         return JsonResponse(data, status=201)
+
+
+class WS(View):
+    def get(self,request,userid):
+        return render(request,'ws_test.html')
