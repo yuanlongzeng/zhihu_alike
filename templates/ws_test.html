@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="info"></div>
+<script type="application/javascript">
+    var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+    var ws = new WebSocket(ws_scheme + '://' + window.location.host + '/ws/push/'+'userid'+'/');
+    console.log(ws);
+    ws.onmessage = function (message) {
+        var data = JSON.parse(message.data);
+        if(data['status'] == 'normal')
+        {
+           var subject = '<br>故障！,服务器:' + data['告警主机'] + '发生:' + data['告警信息'] + '故障!<br>';
+        }
+        else{
+           var subject = '<br>恢复！,服务器:' + data['告警主机'] + '发生:' + data['告警信息'] + '已经恢复!<br>';
+        }
+        content = new Array();
+        $.each(data,function(k,v){
+            content.push("<b>" + k + ':</b>   ' + v)
+        })
+        var data = subject + content.join("<br>")
+        $('#info').text(data);
+    }
+</script>
+</body>
+</html>
