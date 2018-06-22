@@ -41,14 +41,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
-
     "captcha",
     "xadmin",
     "crispy_forms",
     'corsheaders',
     'rest_framework',
     'social_django',
-
+    'djcelery',
 ]
 
 MIDDLEWARE = [
@@ -230,3 +229,8 @@ CHANNEL_LAYERS = {
 GROUP_NAME = 'msg_push'
 
 ASGI_APPLICATION = 'zhihu_alike.routing.application'
+
+import djcelery
+djcelery.setup_loader()
+BROKER_URL= 'redis://192.168.200.127:6379/0'
+CELERY_RESULT_BACKEND = 'redis://192.168.200.127:6379/0'
