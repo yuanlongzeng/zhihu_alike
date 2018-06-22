@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.hashers import make_password
 from django.db.models import Q
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 
 # Create your views here.
@@ -293,3 +293,9 @@ class userfloatbox(View):
             if request.user.is_following(user):
                 followed = True
         return render(request,"userfloatbox.html",{"user":user,"followed":followed})
+
+from .tasks import add
+class CeleryTest(View):
+    def get(self,request):
+        res = add.delay(1,2)
+        return HttpResponse(res)
