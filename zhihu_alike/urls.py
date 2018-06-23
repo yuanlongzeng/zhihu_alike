@@ -80,6 +80,8 @@ urlpatterns = [
     url(r'^topic_follow/(?P<pk>.*)$',genericview.TopicFollowView.as_view(),name='topic_follow'),
 
     url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),  # 静态文件加载，media文件
+    #优雅的解决favicon
+    url(r'^favicon.ico$', serve, {'path': 'imgages/favicon.ico'}),  # 静态文件加载，media文件
     #第三方登录验证
     url('', include('social_django.urls', namespace='social')),
     #rest api
