@@ -20,7 +20,7 @@ from django.views.static import serve
 
 from rest_framework.routers import DefaultRouter
 
-from zhihu.views import Index,Login,Logout,AnswerListViewSet,QuestionListViewSet,CommentViewSet,TopicViewSet,RegisterView,usertest,userfloatbox,CeleryTest
+from zhihu.views import Index,Login,Logout,AnswerListViewSet,QuestionListViewSet,CommentViewSet,TopicViewSet,RegisterView,usertest,userfloatbox
 from zhihu import genericview
 import xadmin
 router = DefaultRouter()
@@ -29,13 +29,11 @@ router.register(r'question', QuestionListViewSet)
 router.register(r'comment', CommentViewSet)
 router.register(r'topic', TopicViewSet)
 urlpatterns = [
-   # url(r'^admin/', admin.site.urls),
+   url(r'^admin/', admin.site.urls),
 
     #第三方工具
     url(r'^xadmin/', xadmin.site.urls),
     url(r'^captcha/', include('captcha.urls')),
-
-    url(r'^celery/$', CeleryTest.as_view(), name="celery"),
 
     #自定义视图
     url(r'^index/$',genericview.IndexView.as_view(),name="index"),

@@ -294,8 +294,3 @@ class userfloatbox(View):
                 followed = True
         return render(request,"userfloatbox.html",{"user":user,"followed":followed})
 
-from .tasks import add
-class CeleryTest(View):
-    def get(self,request):
-        res = add.delay(1,2)
-        return HttpResponse(res)
