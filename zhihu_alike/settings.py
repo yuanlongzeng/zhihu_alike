@@ -225,10 +225,6 @@ CHANNEL_LAYERS = {
 
     }
 }
-#Redis频道和Channels群组名
-GROUP_NAME = 'msg_push'
-
-ASGI_APPLICATION = 'zhihu_alike.routing.application'
 
 import djcelery
 djcelery.setup_loader()

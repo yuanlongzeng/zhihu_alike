@@ -87,7 +87,7 @@ urlpatterns = [
     #rest api
     url(r'^', include(router.urls)),
 
-    url(r'^websocket/(?P<userid>.*)$',genericview.WS.as_view(),name='ws'),
+    # url(r'^websocket/(?P<userid>.*)$',genericview.WS.as_view(),name='ws'),
 
 
 
