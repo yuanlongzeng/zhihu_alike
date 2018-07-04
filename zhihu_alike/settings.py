@@ -33,7 +33,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
    # 'channels',
-    'zhihu.apps.ZhihuConfig',
+    #'zhihu.apps.ZhihuConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'social_django',
     'djcelery',
+    'zhihu',
 ]
 
 MIDDLEWARE = [
@@ -233,5 +234,7 @@ CELERY_RESULT_BACKEND = 'redis://192.168.200.127:6379/0'
 
 # 这样就不用delay了
 CELERY_ALWAYS_EAGER = True
+#导入任务
+CELERY_IMPORTS = ('zhihu.tasks',)
 #存储定期任务
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
