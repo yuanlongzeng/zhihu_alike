@@ -230,6 +230,12 @@ CHANNEL_LAYERS = {
 celery\bin\base.py line 167 -->option_list = ()
 djcelery\management\commands\celery.py line 16 注释掉+base.preload_options
 
+启动：
+先启动runserver
+然后启动celery:python manage.py celery worker -c 4 --loglevel=info
+如果有定时任务：python manage.py celery beat （在/admin中添加，以后研究怎么放到xadmin中）
+
+监控：python manage.py celery flower  （在5555端口查看）
 '''
 import djcelery
 djcelery.setup_loader()
