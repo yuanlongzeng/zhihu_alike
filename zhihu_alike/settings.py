@@ -226,7 +226,11 @@ CHANNEL_LAYERS = {
 
     }
 }
+'''修改celery4.1.1源码 与 djcelery3.2.2 不兼容之处
+celery\bin\base.py line 167 -->option_list = ()
+djcelery\management\commands\celery.py line 16 注释掉+base.preload_options
 
+'''
 import djcelery
 djcelery.setup_loader()
 BROKER_URL= 'redis://192.168.200.127:6379/0'
