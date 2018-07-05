@@ -174,11 +174,30 @@ class UserProfile(AbstractUser):
 
 
 class Message(models.Model):
+    Message_TYPE = (
+        ('F', 'follower'),
+        ('U', 'upvote'),
+        ('UC', 'upvoteComment'),
+        ('T', 'thanks'),
+        ('C', 'comment'),
+        ('RQ', 'replyFromQuestion'),
+        ('RF', 'replyFromFollowee'),
+        ('UF', 'upvoteFromFollowee'),
+        ('IF', 'interestFromFollowee'),
+        ('CF', 'createdFromFollowee'),
+    )
     fromid = models.ForeignKey(UserProfile,related_name="from_user",verbose_name="发送者")
     toid = models.ForeignKey(UserProfile,related_name="to_user",verbose_name="接受者")
     content = models.TextField(verbose_name="内容")
     created_date = models.DateTimeField(default=timezone.now,verbose_name="创建时间")
     status = models.BooleanField(default=True, verbose_name="有效标志")
+    has_read = models.BooleanField(default=False)
+    msg_type = models.CharField(max_length=2,choices=Message_TYPE)
+
+    #各种类型的消息
+    msg_question = models.ForeignKey('Question', related_name='notify_question', blank=True, null=True,verbose_name="关注问题有新回答")
+    #notify_reply = models.ForeignKey(Reply, related_name='notify_reply', blank=True, null=True)
+    msg_comment = models.ForeignKey('Comment', related_name='notify_comment', blank=True, null=True,verbose_name="评论提醒")
 
     class Meta:
         verbose_name = "私信"
