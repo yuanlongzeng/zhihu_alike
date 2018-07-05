@@ -215,17 +215,32 @@ REDIS_OPTIONS = {
     'PASSWD': '123456',
     'DB': 0
 }
-#使用Redis作为消息存储，需安装asgi_redis
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'asgi_redis.RedisChannelLayer',
-        #'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': ['redis://:{0}@{1}:{2}/{3}'.format(REDIS_OPTIONS['PASSWD'], REDIS_OPTIONS['HOST'], REDIS_OPTIONS['PORT'], 1)]
-        },
+# #使用Redis作为消息存储，需安装asgi_redis
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'asgi_redis.RedisChannelLayer',
+#         #'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#         'CONFIG': {
+#             'hosts': ['redis://:{0}@{1}:{2}/{3}'.format(REDIS_OPTIONS['PASSWD'], REDIS_OPTIONS['HOST'], REDIS_OPTIONS['PORT'], 1)]
+#         },
+#
+#     }
+# }
 
+#缓存：请求的内容缓存中没有就会重新生成
+#django-redis缓存 http://django-redis-chs.readthedocs.io/zh_CN/latest/
+#密码设置：CONFIG SET requirepass "123456"  ;AUTH 123456
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": 'redis://:{}@{}:{}/{}'.format( REDIS_OPTIONS['PASSWD'],REDIS_OPTIONS['HOST'], REDIS_OPTIONS['PORT'], 0),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
     }
 }
+
+
 '''修改celery4.1.1源码 与 djcelery3.2.2 不兼容之处
 celery\bin\base.py line 167 -->option_list = ()
 djcelery\management\commands\celery.py line 16 注释掉+base.preload_options
@@ -239,8 +254,8 @@ djcelery\management\commands\celery.py line 16 注释掉+base.preload_options
 '''
 import djcelery
 djcelery.setup_loader()
-BROKER_URL= 'redis://192.168.200.127:6379/0'
-CELERY_RESULT_BACKEND = 'redis://192.168.200.127:6379/0'
+BROKER_URL= 'redis://123456@192.168.200.127:6379/0'
+CELERY_RESULT_BACKEND = 'redis://123456@192.168.200.127:6379/0'
 
 # 这样就不用delay了
 CELERY_ALWAYS_EAGER = True
