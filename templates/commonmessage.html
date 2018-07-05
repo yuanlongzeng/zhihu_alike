@@ -1,0 +1,37 @@
+<ul class="list group">
+	{% for notify in messages %}
+	{% if notify.notify_type == 'R' %}
+		{% if notify.has_read %}
+	<li class="list-group-item">
+		{% else %}
+	<li class="list-group-item list-group-item-info">
+		{% endif %}
+		{% for user in notify.users %}
+		<a href="{{user.user_url}}"> {{user.user_name}}&nbsp;</a>
+		{% endfor %}
+		&nbsp;回答了&nbsp;
+		<a href="{{notify.question_url}}">{{notify.question_title}} </a>
+	</li>
+	{% elif notify.notify_type == 'CF' %}
+		{% if notify.has_read %}
+	<li class="list-group-item">
+		{% else %}
+	<li class="list-group-item list-group-item-info">
+		{% endif %}
+		<a href="{{notify.user_url}}"> {{notify.user_name}} </a>
+		&nbsp;添加了问题&nbsp;
+		<a href="{{notify.question_url}}">{{notify.question_title}} </a>
+	</li>					
+	{% elif notify.notify_type == 'IF' %}
+		{% if notify.has_read %}
+	<li class="list-group-item">
+		{% else %}
+	<li class="list-group-item list-group-item-info">
+		{% endif %}
+		<a href="{{notify.user_url}}"> {{notify.user_name}} </a>
+		&nbsp;关注了问题&nbsp;
+		<a href="{{notify.question_url}}">{{notify.question_title}} </a>
+	</li>
+	{% endif %}
+	{% endfor %}
+</ul>

@@ -1,0 +1,18 @@
+<ul class="list group">
+	<li class="list-group-item">
+		这些人最近关注了你
+	</li>
+	{% for notify in messages %}
+	{% if notify.notify_type == 'F' %}
+		{% if notify.has_read %}
+	<li class="list-group-item">
+		{% else %}
+	<li class="list-group-item list-group-item-info">
+		{% endif %}
+		<img class="Avatar" src="{{notify.notify_from_user.avatar.url}}">
+		<a href="{{notify.notify_from_user.get_absolute_url}}"> &nbsp;&nbsp;{{notify.notify_from_user.fullname}}&nbsp; </a>
+		{{notify.notify_from_user.headline_brief}}
+	</li>					
+	{% endif %}
+	{% endfor %}
+</ul>

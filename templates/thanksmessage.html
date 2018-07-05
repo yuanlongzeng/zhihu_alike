@@ -1,0 +1,29 @@
+<ul class="list group">
+	{% for notify in messages %}
+	{% if notify.notify_type == 'U' %}
+		{% if notify.has_read %}
+	<li class="list-group-item">
+		{% else %}
+	<li class="list-group-item list-group-item-info">
+		{% endif %}
+		{% for user in notify.users %}
+		<a href="{{user.user_url}}"> {{user.user_name}}&nbsp;</a>
+		{% endfor %}
+		&nbsp;赞了你在&nbsp;<a href="{{notify.question_url}}">{{notify.title}} </a>
+		&nbsp;中的回答
+	</li>
+	{% elif notify.notify_type == 'T' %}
+		{% if notify.has_read %}
+	<li class="list-group-item">
+		{% else %}
+	<li class="list-group-item list-group-item-info">
+		{% endif %}
+		{% for user in notify.users %}
+		<a href="{{user.user_url}}"> {{user.user_name}}&nbsp;</a>
+		{% endfor %}
+		&nbsp;感谢了你在&nbsp;<a href="{{notify.question_url}}">{{notify.title}} </a>
+		&nbsp;中的回答
+	</li>					
+	{% endif %}
+	{% endfor %}
+</ul>
