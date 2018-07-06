@@ -230,6 +230,13 @@ REDIS_OPTIONS = {
 #缓存：请求的内容缓存中没有就会重新生成
 #django-redis缓存 http://django-redis-chs.readthedocs.io/zh_CN/latest/
 #密码设置：CONFIG SET requirepass "123456"  ;AUTH 123456
+''''测试
+python manage.py shell
+from django.core.cache import cache
+cache.set(key,value,expire)
+cache.has_key(key)
+cahe.get(key)
+'''
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",

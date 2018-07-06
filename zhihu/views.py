@@ -1,6 +1,8 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.backends import ModelBackend
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
+from django.core.cache import cache
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
@@ -17,7 +19,7 @@ from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 
-from zhihu.models import UserProfile, Comment, Topic
+from zhihu.models import UserProfile, Comment, Topic, Message
 from .forms import LoginForm, RegisterForm
 
 
@@ -294,3 +296,65 @@ class userfloatbox(View):
                 followed = True
         return render(request,"userfloatbox.html",{"user":user,"followed":followed})
 
+
+MESSAGE_TIMEOUT = 10
+
+
+def clean_thanksmessages(zhihuuser, messages):
+    pass
+
+
+def mark_as_read(zhihuuser, param):
+    pass
+
+
+def clean_commonMessages(zhihuuser, messages):
+    pass
+
+
+@login_required
+def getMessageList(request):
+    messageType = None
+    if request.method == 'GET':
+        messageType = request.GET['messageType']
+        args = dict()
+        zhihuuser = request.user.zhihuuser
+        notifies = Message.objects.filter(~Q(notify_from_user__id=zhihuuser.id)) \
+            .filter(notify_to_user__id=zhihuuser.id)
+
+        if messageType == 'thanks':
+            if cache.get('thanksmessage') == None:
+
+                messages = notifies.filter(Q(notify_type='U') | Q(notify_type='T'))
+                args['messages'] = clean_thanksmessages(zhihuuser, messages)
+                #                 args['messages'] = messages
+                response = render(request, 'thanksmessage.html', args)
+                cache.set('thanksmessage', response, MESSAGE_TIMEOUT)
+                mark_as_read(zhihuuser, 'thanks')
+            else:
+                pass
+            return cache.get('thanksmessage')
+        elif messageType == 'user':
+            if cache.get('usermessage') == None:
+
+                messages = notifies.filter(Q(notify_type='F'))
+                args['messages'] = messages
+                response = render(request, 'usermessage.html', args)
+                cache.set('usermessage', response, MESSAGE_TIMEOUT)
+                mark_as_read(zhihuuser, 'user')
+            else:
+                pass
+            return cache.get('usermessage')
+        elif messageType == 'common':
+            if cache.get('commonmessage') == None:
+
+                messages = notifies.filter(Q(notify_type='RF') | Q(notify_type='RQ') \
+                                           | Q(notify_type='CF') | Q(notify_type='IF'))
+                args['messages'] = clean_commonMessages(zhihuuser, messages)
+                #                 args['messages'] = messages
+                response = render(request, 'commonmessage.html', args)
+                cache.set('commonmessage', response, MESSAGE_TIMEOUT)
+                mark_as_read(zhihuuser, 'common')
+            else:
+                pass
+            return cache.get('commonmessage')
