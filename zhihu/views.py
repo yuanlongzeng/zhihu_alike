@@ -328,7 +328,7 @@ def getMessageList(request):
                 messages = notifies.filter(Q(notify_type='U') | Q(notify_type='T'))
                 args['messages'] = clean_thanksmessages(zhihuuser, messages)
                 #                 args['messages'] = messages
-                response = render(request, 'thanksmessage.html', args)
+                response = render(request, 'message_thanks.html', args)
                 cache.set('thanksmessage', response, MESSAGE_TIMEOUT)
                 mark_as_read(zhihuuser, 'thanks')
             else:
@@ -339,7 +339,7 @@ def getMessageList(request):
 
                 messages = notifies.filter(Q(notify_type='F'))
                 args['messages'] = messages
-                response = render(request, 'usermessage.html', args)
+                response = render(request, 'message_user.html', args)
                 cache.set('usermessage', response, MESSAGE_TIMEOUT)
                 mark_as_read(zhihuuser, 'user')
             else:
@@ -352,7 +352,7 @@ def getMessageList(request):
                                            | Q(notify_type='CF') | Q(notify_type='IF'))
                 args['messages'] = clean_commonMessages(zhihuuser, messages)
                 #                 args['messages'] = messages
-                response = render(request, 'commonmessage.html', args)
+                response = render(request, 'message_common.html', args)
                 cache.set('commonmessage', response, MESSAGE_TIMEOUT)
                 mark_as_read(zhihuuser, 'common')
             else:
