@@ -301,7 +301,27 @@ MESSAGE_TIMEOUT = 10
 
 
 def clean_thanksmessages(zhihuuser, messages):
-    pass
+    u_messages = {}
+    t_messages = {}
+    for item in messages:
+        question_id = item.msg_question.id
+        question_url = item.msg_question.get_absolute_url()
+        question_title = item.msg_question.title
+        user_name = item.from_user.nick_name
+        user_url = item.from_user.get_image_url()
+        notify_type = item.msg_type
+        has_read = item.has_read
+        data = (question_url, user_name, user_url, notify_type, has_read, question_title)
+        if notify_type == 'U':
+            if u_messages in question_id:
+                u_messages[question_id].append(data)
+            else:
+                u_messages[question_id] = [data, ]
+        elif notify_type == 'T':
+            if t_messages in question_id:
+                t_messages[question_id].append(data)
+            else:
+                t_messages[question_id] = [data, ]
 
 
 def mark_as_read(zhihuuser, param):
@@ -318,13 +338,12 @@ def getMessageList(request):
     if request.method == 'GET':
         messageType = request.GET['messageType']
         args = dict()
-        zhihuuser = request.user.zhihuuser
-        notifies = Message.objects.filter(~Q(notify_from_user__id=zhihuuser.id)) \
-            .filter(notify_to_user__id=zhihuuser.id)
+        zhihuuser = request.user  #.zhihuuser  ？
+        notifies = Message.objects.filter(~Q(from_user__id=zhihuuser.id)) \
+            .filter(to_user__id=zhihuuser.id)
 
         if messageType == 'thanks':
             if cache.get('thanksmessage') == None:
-
                 messages = notifies.filter(Q(notify_type='U') | Q(notify_type='T'))
                 args['messages'] = clean_thanksmessages(zhihuuser, messages)
                 #                 args['messages'] = messages
