@@ -19,7 +19,7 @@ from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 
-from zhihu.models import UserProfile, Comment, Topic, Message
+from zhihu.models import UserProfile, Comment, Topic, Message, update_unread_count
 from .forms import LoginForm, RegisterForm
 
 
@@ -308,7 +308,7 @@ def clean_thanksmessages(zhihuuser, messages):
         question_url = item.msg_question.get_absolute_url()
         question_title = item.msg_question.title
         user_name = item.from_user.nick_name
-        user_url = item.from_user.get_image_url()
+        user_url = item.from_user.id
         notify_type = item.msg_type
         has_read = item.has_read
         data = (question_url, user_name, user_url, notify_type, has_read, question_title)
@@ -323,13 +323,67 @@ def clean_thanksmessages(zhihuuser, messages):
             else:
                 t_messages[question_id] = [data, ]
 
+#更新未读消息数量
+def mark_as_read(user,notificationType=None):
+    rows = 0
+    if notificationType == None:
+        print ('MARK ALL: ', user)
+        rows = Message.objects.filter(to_user=user,has_read=False).update(has_read=True)
+    else:
+        raw = Message.objects.filter(to_user=user,has_read=False)
+        if notificationType == 'user':
+            rows = raw.filter( Q(msg_type='F') ).update(has_read=True)
+        elif notificationType == 'thanks':
+            rows = raw.filter( Q(msg_type='U') | Q(notify_type='T') ).update(has_read=True)
+        elif notificationType == 'common':
+            rows = raw.filter( Q(msg_type='RF') | Q(msg_type='RQ') \
+                            | Q(msg_type='CF') | Q(msg_type='IF') ).update(has_read=True)
+    update_unread_count(user.id, 0-rows)
 
-def mark_as_read(zhihuuser, param):
-    pass
 
+def clean_commonMessages(user,raw_messages):
+    messages = []
+    r_messages = {}
+    for item in raw_messages:
+        question_id = item.msg_question.id
+        question_title = item.msg_question.title
+        question_url = item.msg_question.id
+        user_name = item.from_user.nick_name
+        user_url = item.from_user.id
+        notify_type = item.msg_type
+        has_read = item.has_read
+        if notify_type == 'CF' or notify_type == 'IF':
+            messages.append({'question_id':question_id,'question_url':question_url,
+                             'user_name':user_name,'user_url':user_url,
+                             'notify_type':notify_type,'has_read':has_read, 'question_title':question_title})
+        elif notify_type == 'RF' or notify_type == 'RQ':
+            data = {'question_id':question_id,'question_url':question_url,
+                    'user_name':user_name,'user_url':user_url,
+                    'notify_type':'R','has_read':has_read, 'question_title':question_title}
+            if r_messages in question_id:
+                r_messages[question_id].append( data )
+            else:
+                r_messages[question_id] = [data,]
 
-def clean_commonMessages(zhihuuser, messages):
-    pass
+    def user_merge(users):
+        merged = {}
+        for user in users:
+            merged[user['user_name']] = user['user_url']
+        merged_users = []
+        for user in merged:
+            merged_users.append({'user_name':user,'user_url':merged[user]})
+        return merged_users
+
+    for question_id in r_messages:
+        data = {'question_id':question_id,'question_url':r_messages[question_id][0]['question_url'],
+                'users':[],
+                'notify_type':r_messages[question_id][0]['notify_type'],'has_read':r_messages[question_id][0]['has_read'],
+                'question_title':r_messages[question_id][0]['question_title']}
+        for item in r_messages[question_id]:
+            data['users'].append({'user_name':item['user_name'],'user_url':item['user_url']})
+        data['users'] = user_merge(data['users'])
+        messages.append(data)
+    return messages
 
 
 @login_required
@@ -356,7 +410,7 @@ def getMessageList(request):
         elif messageType == 'user':
             if cache.get('usermessage') == None:
 
-                messages = notifies.filter(Q(notify_type='F'))
+                messages = notifies.filter(Q(notify_type='F')) #关注
                 args['messages'] = messages
                 response = render(request, 'message_user.html', args)
                 cache.set('usermessage', response, MESSAGE_TIMEOUT)

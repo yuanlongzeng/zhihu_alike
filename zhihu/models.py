@@ -7,6 +7,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.contrib.contenttypes.models import ContentType
 # Create your models here.
 from django.utils import timezone
+from django_redis import get_redis_connection
 
 
 class UserProfile(AbstractUser):
@@ -205,6 +206,14 @@ class Message(models.Model):
 
     def __str__(self):
         return self.created_date
+
+RK_NOTIFICATIONS_COUNTER = 'redis_pending_counter_changes'
+#更新消息数量
+def update_unread_count(user_id,count):
+#     UserNotificationCounter.objects.filter(pk=user_id).update(unread_count = F('unread_count') + count)
+    con = get_redis_connection('default')
+    con.zincrby(RK_NOTIFICATIONS_COUNTER, str(user_id), count)
+
 
 class Comment(models.Model):
     content = models.TextField()

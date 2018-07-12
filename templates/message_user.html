@@ -9,9 +9,9 @@
 		{% else %}
 	<li class="list-group-item list-group-item-info">
 		{% endif %}
-		<img class="Avatar" src="{{notify.notify_from_user.avatar.url}}">
-		<a href="{{notify.notify_from_user.get_absolute_url}}"> &nbsp;&nbsp;{{notify.notify_from_user.fullname}}&nbsp; </a>
-		{{notify.notify_from_user.headline_brief}}
+		<img class="Avatar" src="{{notify.from_user.get_image_url}}">
+		<a href="{{notify.from_user.id}}"> &nbsp;&nbsp;{{notify.from_user.nick_name}}&nbsp; </a>
+		{{notify.from_user.desc}}
 	</li>					
 	{% endif %}
 	{% endfor %}
