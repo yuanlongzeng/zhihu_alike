@@ -51,6 +51,10 @@
                         <li><a href="{% url 'index' %}">首页</a></li>
                         <li><a href="{% url 'explore' %}">发现</a></li>
                         <li><a href="{% url 'topics_list' %}">话题</a></li>
+                        {% if request.user.is_authenticated %}
+                        <li><a href="{% url 'topics_list' %}">未读消息:{{ message_count }}</a></li>
+                        {% endif %}
+
 
                     </ul>
                     <form action="/search" class="navbar-form navbar-left" role="search">

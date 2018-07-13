@@ -6,7 +6,8 @@ from django.shortcuts import render, redirect
 from django.views import generic, View
 
 from zhihu.forms import AnswerForm
-from zhihu.models import Question, Answer, Comment, UserProfile, Topic
+from zhihu.models import Question, Answer, Comment, UserProfile, Topic, UserNotificationCounter
+
 
 # 首页功能：推（活跃用户）--拉模式、推荐
 class IndexView(LoginRequiredMixin, generic.DetailView):
@@ -42,6 +43,11 @@ class IndexView(LoginRequiredMixin, generic.DetailView):
         vote_list = []
         collection_list = []
         context['asks'] = asks
+        user = UserNotificationCounter.objects.filter(pk=self.request.user.id)
+        if user:
+            context['message_count'] = user[0].unread_count
+        else:
+            context['message_count'] = 0
         context['answers'] = self.object.page(1)
         if self.request.user.is_authenticated:
             for answer in self.object.page(1):

@@ -6,6 +6,8 @@ from django.contrib.auth.models import User,AbstractUser
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 # Create your models here.
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 from django.utils import timezone
 from django_redis import get_redis_connection
 
@@ -193,7 +195,7 @@ class Message(models.Model):
     created_date = models.DateTimeField(default=timezone.now,verbose_name="创建时间")
     status = models.BooleanField(default=True, verbose_name="有效标志")
     has_read = models.BooleanField(default=False)
-    msg_type = models.CharField(max_length=2,choices=Message_TYPE)
+    msg_type = models.CharField(max_length=2,choices=Message_TYPE,default='F')
 
     #各种类型的消息
     msg_question = models.ForeignKey('Question', related_name='notify_question', blank=True, null=True,verbose_name="关注问题有新回答")
@@ -207,6 +209,13 @@ class Message(models.Model):
     def __str__(self):
         return self.created_date
 
+class UserNotificationCounter(models.Model):
+    user_id = models.IntegerField(primary_key=True)
+    unread_count = models.IntegerField(default=0)
+
+    def __str__(self):
+        return "user unread notifications count: id={0},count={1}".format(self.user_id, self.unread_count)
+
 RK_NOTIFICATIONS_COUNTER = 'redis_pending_counter_changes'
 #更新消息数量
 def update_unread_count(user_id,count):
@@ -214,6 +223,22 @@ def update_unread_count(user_id,count):
     con = get_redis_connection('default')
     con.zincrby(RK_NOTIFICATIONS_COUNTER, str(user_id), count)
 
+# 信号
+@receiver(post_save, sender=Message)
+def incr_notifications_counter(instance, created, **kwargs):
+    print('CREATE: ', instance.from_user, instance.to_user, instance.msg_type)
+    if created and not instance.has_read:
+        update_unread_count(instance.to_user.id, 1)
+    else:
+        return
+
+@receiver(post_delete, sender=Message)
+def decr_notifications_counter(instance, **kwargs):
+    print('DELETE: ', instance.from_user, instance.to_user, instance.msg_type)
+    if not instance.has_read:
+        update_unread_count(instance.to_user.id, -1)
+    else:
+        return
 
 class Comment(models.Model):
     content = models.TextField()
