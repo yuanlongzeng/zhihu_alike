@@ -174,7 +174,11 @@ class UserProfile(AbstractUser):
 
     def is_follow_topic(self, topic):
         return self.follow_topics.filter(id=topic.id).exists()
-
+#创建用户的同时添加UserMessageCounter
+@receiver(post_save,sender=UserProfile)
+def createUserNotificationCounter(instance,created,**kwargs):
+    if created:
+        UserMessageCounter.objects.create(pk=instance.id)
 
 class Message(models.Model):
     '''
