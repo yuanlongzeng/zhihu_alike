@@ -28,6 +28,7 @@ class UserProfile(AbstractUser):
 
    #当定义模型通过中间模型与其自身产生的多对多关系时，你必须使用参数symmetrical=False
     followings = models.ManyToManyField('self', related_name='funs', symmetrical=False,blank=True,null=True, verbose_name='关注')  #关注了--followee
+    #related_name 字段名 模型中的函数名 三者不能有任何一个重名的  否则会报错
     followers = models.ManyToManyField('self', related_name='my_followers', symmetrical=False,blank=True,null=True, verbose_name='关注者')
     vote_answers = models.ManyToManyField("Answer", related_name='vote_user', blank=True,null=True, verbose_name='点赞答案')
     unvote_answers = models.ManyToManyField("Answer", related_name='unvote_user', blank=True,null=True, verbose_name='反对答案')
