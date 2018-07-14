@@ -20,7 +20,8 @@ from django.views.static import serve
 
 from rest_framework.routers import DefaultRouter
 
-from zhihu.views import Index,Login,Logout,AnswerListViewSet,QuestionListViewSet,CommentViewSet,TopicViewSet,RegisterView,usertest,userfloatbox
+from zhihu.views import Index, Login, Logout, AnswerListViewSet, QuestionListViewSet, CommentViewSet, TopicViewSet, \
+ RegisterView, usertest, userfloatbox, getMessageList
 from zhihu import genericview
 import xadmin
 router = DefaultRouter()
@@ -60,7 +61,8 @@ urlpatterns = [
     url(r'^questionfollow/(?P<pk>.*)$',genericview.follow_ask,name='answer_votedown'),
     url(r'^questionunfollow/(?P<pk>.*)$',genericview.unfollow_ask,name='answer_votedown'),
 
-
+    #消息
+    url(r'^messagelist/$', getMessageList, name='messageList'),
 
     #收藏
     url(r'^answercollect/(?P<pk>.*)$',genericview.collect,name='answer_collect'),
