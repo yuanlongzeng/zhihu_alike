@@ -3,13 +3,13 @@
 		这些人最近关注了你
 	</li>
 	{% for notify in messages %}
-	{% if notify.notify_type == 'F' %}
+	{% if notify.msg_type == 'F' %}
 		{% if notify.has_read %}
 	<li class="list-group-item">
 		{% else %}
 	<li class="list-group-item list-group-item-info">
 		{% endif %}
-		<img class="Avatar" src="{{notify.from_user.get_image_url}}">
+		<img class="Avatar" src="{{ MEDIA_URL }}{{notify.from_user.get_image_url}}">
 		<a href="{{notify.from_user.id}}"> &nbsp;&nbsp;{{notify.from_user.nick_name}}&nbsp; </a>
 		{{notify.from_user.desc}}
 	</li>					

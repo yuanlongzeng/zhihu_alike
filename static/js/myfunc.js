@@ -24,8 +24,8 @@ function login() {
         body: new FormData(document.getElementById('login-form')),
         // body: new FormData($('#login-form')),
         credentials: 'include',
-    }).then( response => response.json()
-    ).then( data => {
+    }).then(response => response.json()
+    ).then(data => {
         if (data.ok) {
             location.reload()
         } else {
@@ -38,16 +38,16 @@ function login() {
 
 function register() {
     for (let i = 1; i <= 5; i++) {
-        $('#register-input-'+i).removeClass('has-error');
-        $('#register-message-'+i).text('');
+        $('#register-input-' + i).removeClass('has-error');
+        $('#register-message-' + i).text('');
     }
     let link = '/register/';
     fetch(link, {
         method: 'POST',
         body: new FormData(document.getElementById('register-form')),
         credentials: 'include',
-    }).then( response => response.json()
-    ).then( data => {
+    }).then(response => response.json()
+    ).then(data => {
         if (data.ok) {
             location.reload();
         } else {
@@ -78,12 +78,12 @@ function register() {
 function voteUp(x, id) {
     let headers = new Headers();
     headers.append('X-CSRFToken', getCookie('csrftoken'));
-    let link = '/answervoteup/'+ id;
+    let link = '/answervoteup/' + id;
     fetch(link, {
         headers: headers,
         method: 'POST',
         credentials: 'include'
-    }).then( response => {
+    }).then(response => {
         if (response.ok) {
             return response.json();
         } else {
@@ -101,7 +101,7 @@ function voteUp(x, id) {
 function voteDown(x, id) {
     let headers = new Headers();
     headers.append('X-CSRFToken', getCookie('csrftoken'));
-    let link = '/answervotedown/'+ id;
+    let link = '/answervotedown/' + id;
     fetch(link, {
         headers: headers,
         method: 'POST',
@@ -129,7 +129,7 @@ function collect(x, id) {
         headers: headers,
         method: 'POST',
         credentials: 'include'
-    }).then( response => {
+    }).then(response => {
         if (response.ok) {
             return response.json();
         } else {
@@ -175,7 +175,7 @@ function followAsk(x, id) {
         headers: headers,
         method: 'POST',
         credentials: 'include'
-    }).then( response => {
+    }).then(response => {
         if (response.ok) {
             return response.json();
         } else {
@@ -198,7 +198,7 @@ function unfollowAsk(x, id) {
         headers: headers,
         method: 'POST',
         credentials: 'include'
-    }).then( response => {
+    }).then(response => {
         if (response.ok) {
             return response.json();
         } else {
@@ -215,7 +215,7 @@ function unfollowAsk(x, id) {
 }
 
 function readmore(x, id) {
-    let link = '/answercontent/'+id;
+    let link = '/answercontent/' + id;
     fetch(link, {
         method: 'GET',
         credentials: 'include'
@@ -278,33 +278,41 @@ function enter(x) {
 function leave(x) {
     $(x).text('  已关注');
 }
+
+
+
 $(function () {
 
-$('#messages').click( function(event){
-		$('#messagecount').html('');
-		// $.get('/mark/', function(data){
+    $('#messages').click(function (event) {
+        $('#messagecount').html('');
+        // $.get('/mark/', function(data){
         //
-		// });
-		$.get('/messagelist/', {messageType:"common"}, function(data){
-			$('#commonMessage').html(data);
-		});
-	});
+        // });
+        // $.get('/messagelist/', {messageType: "common"}, function (data) {
+        //     $('#commonMessage').html(data);
+        // });
 
-$('#thanksMessageTab').click( function(event){
-		$.get('/messagelist/', {messageType:"thanks"}, function(data){
-			// console.log(data);
-			$('#thanksMessage').html(data);
-		});
-	});
-	$('#userMessageTab').click( function(event){
-		$.get('/messagelist/', {messageType:"user"}, function(data){
-			$('#uerMessage').html(data);
-		});
-	});
-	$('#commonMessageTab').click( function(event){
-		$.get('/messagelist/', {messageType:"common"}, function(data){
-			$('#commonMessage').html(data);
-		});
-	});
+         $.get('/msglist/', {messageType: "user"}, function (data) {
+            $('#msg_content').html(data);
+        });
+    });
+
+    $('#thanksMessageTab').click(function (event) {
+        $.get('/messagelist/', {messageType: "thanks"}, function (data) {
+            // console.log(data);
+            $('#thanksMessage').html(data);
+        });
+    });
+    $('#userMessageTab').click(function (event) {
+        $.get('/messagelist/', {messageType: "user"}, function (data) {
+            $('#msg_content').html(data);
+        });
+    });
+    $('#commonMessageTab').click(function (event) {
+        $.get('/messagelist/', {messageType: "common"}, function (data) {
+            $('#commonMessage').html(data);
+        });
+    });
+
 
 })
