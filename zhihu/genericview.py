@@ -6,7 +6,8 @@ from django.shortcuts import render, redirect
 from django.views import generic, View
 
 from zhihu.forms import AnswerForm
-from zhihu.models import Question, Answer, Comment, UserProfile, Topic, UserNotificationCounter
+from zhihu.models import Question, Answer, Comment, UserProfile, Topic, Message, createMessages, \
+    deleteMessages, UserMessageCounter
 
 
 # 首页功能：推（活跃用户）--拉模式、推荐
@@ -43,7 +44,7 @@ class IndexView(LoginRequiredMixin, generic.DetailView):
         vote_list = []
         collection_list = []
         context['asks'] = asks
-        user = UserNotificationCounter.objects.filter(pk=self.request.user.id)
+        user = UserMessageCounter.objects.filter(pk=self.request.user.id)
         if user:
             context['message_count'] = user[0].unread_count
         else:
@@ -87,13 +88,15 @@ class FollowUserView(LoginRequiredMixin,View):
     def get(self,request,userid):
         data = dict(r=0)
         user = UserProfile.objects.get(id=int(userid))
-        if request.user.is_following(user):
+        if request.user.is_following(user):  #已关注该用户就取消关注
             request.user.unfollow(user.id)
-            if user.is_follower(request.user):
+            if user.is_follower(request.user):  #从该用户的关注者中删除自己
                 user.unfollower(request.user.id)
+            deleteMessages(from_user=request.user, to_user=user, notify_type='F')
         else:
             request.user.follow(user.id)
             user.follower(request.user.id)
+            createMessages(from_user=request.user, to_user=user, notify_type='F')  #发送给要关注的那个人
             data['r'] = 1
         return JsonResponse(data)
 

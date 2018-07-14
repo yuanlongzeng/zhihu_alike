@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand
 
 from django.db.models import F
 
-from zhihu.models import UserNotificationCounter
+from zhihu.models import UserMessageCounter
 from zhihu.models import RK_NOTIFICATIONS_COUNTER
 from django_redis import get_redis_connection
 
@@ -20,4 +20,4 @@ class Command(BaseCommand):
             count = int(count)
             
             self.stdout.write( 'Updating unread count user {0}: count {1}'.format(user_id, count) )
-            UserNotificationCounter.objects.filter(pk=user_id).update(unread_count = F('unread_count') + count)
+            UserMessageCounter.objects.filter(pk=user_id).update(unread_count = F('unread_count') + count)

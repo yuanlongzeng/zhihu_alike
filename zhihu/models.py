@@ -28,7 +28,7 @@ class UserProfile(AbstractUser):
 
    #当定义模型通过中间模型与其自身产生的多对多关系时，你必须使用参数symmetrical=False
     followings = models.ManyToManyField('self', related_name='funs', symmetrical=False,blank=True,null=True, verbose_name='关注')  #关注了--followee
-    followers = models.ManyToManyField('self', related_name='follower', symmetrical=False,blank=True,null=True, verbose_name='关注者')
+    followers = models.ManyToManyField('self', related_name='my_followers', symmetrical=False,blank=True,null=True, verbose_name='关注者')
     vote_answers = models.ManyToManyField("Answer", related_name='vote_user', blank=True,null=True, verbose_name='点赞答案')
     unvote_answers = models.ManyToManyField("Answer", related_name='unvote_user', blank=True,null=True, verbose_name='反对答案')
     collections = models.ManyToManyField("Answer", related_name='collection_user', blank=True,null=True, verbose_name='收藏')  #不知回答-，文章等
@@ -177,20 +177,26 @@ class UserProfile(AbstractUser):
 
 
 class Message(models.Model):
+    '''
+    关注自己，回答有新评论、赞、反对等，
+    有人回复自己的评论
+    关注的问题有新回答
+    (评论点赞、点踩)
+    '''
     Message_TYPE = (
-        ('F', 'follower'),
-        ('U', 'upvote'),
-        ('UC', 'upvoteComment'),
-        ('T', 'thanks'),
-        ('C', 'comment'),
+        ('F', 'follower'), #关注自己
+        ('U', 'upvote'),   #赞回答
+        ('UC', 'upvoteComment'), # 评论点赞 ---
+        ('T', 'thanks'), # 感谢回答--
+        ('C', 'comment'),  # 回答有新评论
         ('RQ', 'replyFromQuestion'),
         ('RF', 'replyFromFollowee'),
         ('UF', 'upvoteFromFollowee'),
         ('IF', 'interestFromFollowee'),
         ('CF', 'createdFromFollowee'),
     )
-    fromid = models.ForeignKey(UserProfile,related_name="from_user",verbose_name="发送者")
-    toid = models.ForeignKey(UserProfile,related_name="to_user",verbose_name="接受者")
+    from_user = models.ForeignKey(UserProfile,related_name="from_user",verbose_name="发送者")
+    to_user = models.ForeignKey(UserProfile,related_name="to_user",verbose_name="接受者")
     content = models.TextField(verbose_name="内容")
     created_date = models.DateTimeField(default=timezone.now,verbose_name="创建时间")
     status = models.BooleanField(default=True, verbose_name="有效标志")
@@ -209,7 +215,7 @@ class Message(models.Model):
     def __str__(self):
         return self.created_date
 
-class UserNotificationCounter(models.Model):
+class UserMessageCounter(models.Model):
     user_id = models.IntegerField(primary_key=True)
     unread_count = models.IntegerField(default=0)
 
@@ -219,12 +225,12 @@ class UserNotificationCounter(models.Model):
 RK_NOTIFICATIONS_COUNTER = 'redis_pending_counter_changes'
 #更新消息数量
 def update_unread_count(user_id,count):
-#     UserNotificationCounter.objects.filter(pk=user_id).update(unread_count = F('unread_count') + count)
+#     UserMessageCounter.objects.filter(pk=user_id).update(unread_count = F('unread_count') + count)
     con = get_redis_connection('default')
     con.zincrby(RK_NOTIFICATIONS_COUNTER, str(user_id), count)
 
 # 信号
-@receiver(post_save, sender=Message)
+@receiver(post_save, sender=Message,dispatch_uid="uid")
 def incr_notifications_counter(instance, created, **kwargs):
     print('CREATE: ', instance.from_user, instance.to_user, instance.msg_type)
     if created and not instance.has_read:
@@ -239,6 +245,114 @@ def decr_notifications_counter(instance, **kwargs):
         update_unread_count(instance.to_user.id, -1)
     else:
         return
+
+#创建消息
+def createMessages(from_user,to_user,notify_type,topic=None,question=None,reply=None,comment=None):
+    '''
+    创建的时候就会触发信号--更新redis中的数据--执行命令同步到数据库UserMessageCount中
+    :param from_user:
+    :param to_user:
+    :param notify_type:
+    :param topic:
+    :param question:
+    :param reply:
+    :param comment:
+    :return:
+    '''
+    if from_user == to_user:
+        return
+    if notify_type == 'F':
+        Message.objects.create(
+                            from_user=from_user,
+                            to_user=to_user,
+                            msg_type=notify_type,
+                            )
+    elif notify_type == 'U' or notify_type == 'T':
+        Message.objects.create(
+                            from_user=from_user,
+                            to_user=to_user,
+                            msg_type=notify_type,
+                            msg_question=question,
+
+                            )
+    elif notify_type == 'UC' or notify_type == 'C':
+        Message.objects.create(
+                            from_user=from_user,
+                            to_user=to_user,
+                            msg_type=notify_type,
+                            msg_question=question,
+                            msg_comment=comment,
+                            )
+    elif notify_type == 'RQ' or notify_type == 'RF' \
+      or notify_type == 'UF':
+        for user in to_user:
+            if from_user == to_user:
+                continue
+            Message.objects.create(
+                            from_user=from_user,
+                            to_user=user,
+                            msg_type=notify_type,
+                            msg_question=question,
+
+                            )
+    elif notify_type == 'CF' or notify_type == 'IF':
+        for user in to_user:
+            if from_user == to_user:
+                continue
+            Message.objects.create(
+                            from_user=from_user,
+                            to_user=user,
+                            msg_type=notify_type,
+                            msg_question=question,
+                            )
+
+def deleteMessages(from_user,to_user,notify_type,topic=None,question=None,reply=None,comment=None):
+    if notify_type == 'F':
+        notification = Message.objects.get(
+                            from_user=from_user,
+                            to_user=to_user,
+                            msg_type=notify_type,
+                                            )
+        notification.delete()
+    elif notify_type == 'U' or notify_type == 'T':
+        notification = Message.objects.get(
+                            from_user=from_user,
+                            to_user=to_user,
+                            msg_type=notify_type,
+                            msg_question=question,
+
+                                            )
+        notification.delete()
+    elif notify_type == 'UC' or notify_type == 'C':
+        notification = Message.objects.get(
+                            from_user=from_user,
+                            to_user=to_user,
+                            msg_type=notify_type,
+                            msg_question=question,
+
+                            msg_comment=comment,
+                            )
+        notification.delete()
+    elif notify_type == 'RQ' or notify_type == 'RF' \
+      or notify_type == 'UF':
+        for user in to_user:
+            notification = Message.objects.get(
+                                from_user=from_user,
+                                to_user=user,
+                                msg_type=notify_type,
+                                msg_question=question,
+
+                                )
+            notification.delete()
+    elif notify_type == 'CF' or notify_type == 'IF':
+        for user in to_user:
+            notification = Message.objects.get(
+                                from_user=from_user,
+                                to_user=user,
+                                msg_type=notify_type,
+                                msg_question=question,
+                                                )
+            notification.delete()
 
 class Comment(models.Model):
     content = models.TextField()
