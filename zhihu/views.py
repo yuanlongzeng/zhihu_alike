@@ -3,6 +3,7 @@ from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import AnonymousUser
 from django.core.cache import cache
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
@@ -410,7 +411,6 @@ class MsgListView(LoginRequiredMixin,View):
             return cache.get('thanksmessage')
         elif messageType == 'user':
             if cache.get('usermessage') == None:
-
                 messages = notifies.filter(Q(msg_type='F')) #关注
                 args['messages'] = messages
                 response = render(request, 'message_user.html', args)
@@ -437,5 +437,7 @@ class MsgListView(LoginRequiredMixin,View):
 class UserDetailView(View):
     def get(self,request,userid):
         user = UserProfile.objects.get(pk=userid)
-        is_follow = request.user.is_following(user)
+        is_follow = False
+        if not isinstance(request.user,AnonymousUser):
+            is_follow = request.user.is_following(user)
         return render(request,"detail.html",{"people":user,"is_following":is_follow})

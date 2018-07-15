@@ -197,7 +197,7 @@ class Message(models.Model):
         ('RQ', 'replyFromQuestion'),
         ('RF', 'replyFromFollowee'),
         ('UF', 'upvoteFromFollowee'),
-        ('IF', 'interestFromFollowee'),
+        ('IF', 'interestFromFollowee'),  #关注问题
         ('CF', 'createdFromFollowee'),
     )
     from_user = models.ForeignKey(UserProfile,related_name="from_user",verbose_name="发送者")
@@ -267,21 +267,22 @@ def createMessages(from_user,to_user,notify_type,topic=None,question=None,reply=
     if from_user == to_user:
         return
     if notify_type == 'F':
-        Message.objects.create(
+        Message.objects.get_or_create(
                             from_user=from_user,
                             to_user=to_user,
                             msg_type=notify_type,
                             )
     elif notify_type == 'U' or notify_type == 'T':
-        Message.objects.create(
+        Message.objects.get_or_create(
                             from_user=from_user,
                             to_user=to_user,
                             msg_type=notify_type,
                             msg_question=question,
 
                             )
+
     elif notify_type == 'UC' or notify_type == 'C':
-        Message.objects.create(
+        Message.objects.get_or_create(
                             from_user=from_user,
                             to_user=to_user,
                             msg_type=notify_type,
@@ -293,7 +294,7 @@ def createMessages(from_user,to_user,notify_type,topic=None,question=None,reply=
         for user in to_user:
             if from_user == to_user:
                 continue
-            Message.objects.create(
+            Message.objects.get_or_create(
                             from_user=from_user,
                             to_user=user,
                             msg_type=notify_type,
@@ -304,7 +305,7 @@ def createMessages(from_user,to_user,notify_type,topic=None,question=None,reply=
         for user in to_user:
             if from_user == to_user:
                 continue
-            Message.objects.create(
+            Message.objects.get_or_create(
                             from_user=from_user,
                             to_user=user,
                             msg_type=notify_type,
@@ -395,7 +396,7 @@ class Question(models.Model):
     clicks = models.IntegerField(default=0,verbose_name="点击数")
     created_date = models.DateTimeField(default=timezone.now,verbose_name="创建时间")
     recent_modify_date = models.DateTimeField(default=timezone.now,verbose_name="修改时间")
-
+    follower = models.ManyToManyField(UserProfile,blank=True,null=True,related_name="my_follow_question",verbose_name="问题关注者")
     comment_list = GenericRelation("Comment", verbose_name="评论列表")
     #comment = models.ManyToManyField(Comment,blank=True,null=True,verbose_name="评论")
     #answer = models.ForeignKey("Answer")  #应该是由问题得到答案的多---但是问题应该只存一份即可  要是放这就得每一个回答就得新建一个问题 --冗余  而放在回答中就只需要存问题的id就可以

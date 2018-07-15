@@ -423,7 +423,8 @@ def follow_ask(request, pk):
             ret = user.follow_ask(ask)
             if ret is True:
                 data['r'] = 0
-                #logger.info('{} 关注了问题： {}'.format(user, ask.id))
+                ask.follower.add(user)
+                createMessages(from_user=user,to_user=user.followers.all(),notify_type="IF",question=ask)
             else:
                 pass
                 #logger.error('{} 关注问题失败: {}'.format(user, ask.id))
@@ -443,6 +444,7 @@ def unfollow_ask(request, pk):
             if ret is True:
                 data['r'] = 0
                 #logger.info('{} 取消关注了问题： {}'.format(user, ask.id))
+                ask.follower.remove(user)
             else:
                 pass
                 #logger.error('{} 取消关注问题失败: {}'.format(user, ask.id))
@@ -462,7 +464,10 @@ class CreateAnswerView(LoginRequiredMixin, generic.CreateView):
             answer.question = ask
             answer.user = user
             answer.save()
-            #logger.info('{} 回答了问题 : {}'.format(self.request.user, answer))
+            #作者的关注者发提醒
+            createMessages(from_user=user, to_user=user.followers.all(), notify_type='CF', question=ask)
+            # 问题的关注者发提醒
+            createMessages(from_user=user, to_user=ask.follower.all(), notify_type='CF', question=ask)
         return redirect(self.request.META.get('HTTP_REFERER', '/'))
 
     def form_invalid(self, form):
