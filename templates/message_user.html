@@ -5,14 +5,14 @@
 	{% for notify in messages %}
 	{% if notify.msg_type == 'F' %}
 		{% if notify.has_read %}
-	<li class="list-group-item">
+            <li class="list-group-item">
 		{% else %}
 	<li class="list-group-item list-group-item-info">
-		{% endif %}
-		<img class="Avatar" src="{{ MEDIA_URL }}{{notify.from_user.get_image_url}}">
-		<a href="{{notify.from_user.id}}"> &nbsp;&nbsp;{{notify.from_user.nick_name}}&nbsp; </a>
-		{{notify.from_user.desc}}
-	</li>					
+{% endif %}
+		<img class="Avatar" src="{{ MEDIA_URL }}{{notify.from_user.get_image_url}}" class="img-rounded" width="20px" height="20px">
+		<a href="{% url "user_detail" notify.from_user.id %}"> {{notify.from_user.nick_name}}</a>
+		{{notify.from_user.username}}
+	</li>
 	{% endif %}
 	{% endfor %}
 </ul>

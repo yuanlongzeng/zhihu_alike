@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
@@ -309,15 +310,15 @@ def clean_thanksmessages(zhihuuser, messages):
         question_title = item.msg_question.title
         user_name = item.from_user.nick_name
         user_url = item.from_user.id
-        notify_type = item.msg_type
+        msg_type = item.msg_type
         has_read = item.has_read
-        data = (question_url, user_name, user_url, notify_type, has_read, question_title)
-        if notify_type == 'U':
+        data = (question_url, user_name, user_url, msg_type, has_read, question_title)
+        if msg_type == 'U':
             if u_messages in question_id:
                 u_messages[question_id].append(data)
             else:
                 u_messages[question_id] = [data, ]
-        elif notify_type == 'T':
+        elif msg_type == 'T':
             if t_messages in question_id:
                 t_messages[question_id].append(data)
             else:
@@ -334,7 +335,7 @@ def mark_as_read(user,notificationType=None):
         if notificationType == 'user':
             rows = raw.filter( Q(msg_type='F') ).update(has_read=True)
         elif notificationType == 'thanks':
-            rows = raw.filter( Q(msg_type='U') | Q(notify_type='T') ).update(has_read=True)
+            rows = raw.filter( Q(msg_type='U') | Q(msg_type='T') ).update(has_read=True)
         elif notificationType == 'common':
             rows = raw.filter( Q(msg_type='RF') | Q(msg_type='RQ') \
                             | Q(msg_type='CF') | Q(msg_type='IF') ).update(has_read=True)
@@ -350,16 +351,16 @@ def clean_commonMessages(user,raw_messages):
         question_url = item.msg_question.id
         user_name = item.from_user.nick_name
         user_url = item.from_user.id
-        notify_type = item.msg_type
+        msg_type = item.msg_type
         has_read = item.has_read
-        if notify_type == 'CF' or notify_type == 'IF':
+        if msg_type == 'CF' or msg_type == 'IF':
             messages.append({'question_id':question_id,'question_url':question_url,
                              'user_name':user_name,'user_url':user_url,
-                             'notify_type':notify_type,'has_read':has_read, 'question_title':question_title})
-        elif notify_type == 'RF' or notify_type == 'RQ':
+                             'msg_type':msg_type,'has_read':has_read, 'question_title':question_title})
+        elif msg_type == 'RF' or msg_type == 'RQ':
             data = {'question_id':question_id,'question_url':question_url,
                     'user_name':user_name,'user_url':user_url,
-                    'notify_type':'R','has_read':has_read, 'question_title':question_title}
+                    'msg_type':'R','has_read':has_read, 'question_title':question_title}
             if r_messages in question_id:
                 r_messages[question_id].append( data )
             else:
@@ -377,7 +378,7 @@ def clean_commonMessages(user,raw_messages):
     for question_id in r_messages:
         data = {'question_id':question_id,'question_url':r_messages[question_id][0]['question_url'],
                 'users':[],
-                'notify_type':r_messages[question_id][0]['notify_type'],'has_read':r_messages[question_id][0]['has_read'],
+                'msg_type':r_messages[question_id][0]['msg_type'],'has_read':r_messages[question_id][0]['has_read'],
                 'question_title':r_messages[question_id][0]['question_title']}
         for item in r_messages[question_id]:
             data['users'].append({'user_name':item['user_name'],'user_url':item['user_url']})
@@ -386,10 +387,10 @@ def clean_commonMessages(user,raw_messages):
     return messages
 
 
-@login_required
-def getMessageList(request):
+#@login_required   http://127.0.0.1:8000/accounts/login/?next=/msglist/%3FmessageType%3Duser  ???????????  @login_required与LoginRequiredMixin处理方式的异同
+class MsgListView(LoginRequiredMixin,View):
     messageType = None
-    if request.method == 'GET':
+    def get(self,request):
         messageType = request.GET['messageType']
         args = dict()
         zhihuuser = request.user  #.zhihuuser  ？
@@ -398,7 +399,7 @@ def getMessageList(request):
 
         if messageType == 'thanks':
             if cache.get('thanksmessage') == None:
-                messages = notifies.filter(Q(notify_type='U') | Q(notify_type='T'))
+                messages = notifies.filter(Q(msg_type='U') | Q(msg_type='T'))
                 args['messages'] = clean_thanksmessages(zhihuuser, messages)
                 #                 args['messages'] = messages
                 response = render(request, 'message_thanks.html', args)
@@ -410,7 +411,7 @@ def getMessageList(request):
         elif messageType == 'user':
             if cache.get('usermessage') == None:
 
-                messages = notifies.filter(Q(notify_type='F')) #关注
+                messages = notifies.filter(Q(msg_type='F')) #关注
                 args['messages'] = messages
                 response = render(request, 'message_user.html', args)
                 cache.set('usermessage', response, MESSAGE_TIMEOUT)
@@ -421,8 +422,8 @@ def getMessageList(request):
         elif messageType == 'common':
             if cache.get('commonmessage') == None:
 
-                messages = notifies.filter(Q(notify_type='RF') | Q(notify_type='RQ') \
-                                           | Q(notify_type='CF') | Q(notify_type='IF'))
+                messages = notifies.filter(Q(msg_type='RF') | Q(msg_type='RQ') \
+                                           | Q(msg_type='CF') | Q(msg_type='IF'))
                 args['messages'] = clean_commonMessages(zhihuuser, messages)
                 #                 args['messages'] = messages
                 response = render(request, 'message_common.html', args)
@@ -431,3 +432,10 @@ def getMessageList(request):
             else:
                 pass
             return cache.get('commonmessage')
+
+
+class UserDetailView(View):
+    def get(self,request,userid):
+        user = UserProfile.objects.get(pk=userid)
+        is_follow = request.user.is_following(user)
+        return render(request,"detail.html",{"people":user,"is_following":is_follow})

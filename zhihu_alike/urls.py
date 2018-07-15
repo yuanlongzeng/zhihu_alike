@@ -21,7 +21,7 @@ from django.views.static import serve
 from rest_framework.routers import DefaultRouter
 
 from zhihu.views import Index, Login, Logout, AnswerListViewSet, QuestionListViewSet, CommentViewSet, TopicViewSet, \
- RegisterView, usertest, userfloatbox, MsgListView
+ RegisterView, usertest, userfloatbox, MsgListView, UserDetailView
 from zhihu import genericview
 import xadmin
 router = DefaultRouter()
@@ -46,7 +46,8 @@ urlpatterns = [
     url(r'^userfloatbox/',userfloatbox.as_view(),name='userfloatbox'),
     url(r'^userfollow/(?P<userid>.*)$',genericview.FollowUserView.as_view(),name='userfollow'),
 
-    url(r'^userdetail/(?P<pk>.*)$',genericview.IndexView.as_view(),name='user_detail'),
+    url(r'^userdetail/(?P<userid>.*)$',UserDetailView.as_view(),name='user_detail'),
+    url(r'^userprofile/(?P<userid>.*)$',UserDetailView.as_view(),name='user_profile'),
     url(r'^explore/$',genericview.ExploreView.as_view(),name='explore'),
 
     #answer
