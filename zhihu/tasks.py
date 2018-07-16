@@ -20,10 +20,10 @@ def update_counter():
         # 兼容已存在用户
         user = UserMessageCounter.objects.filter(pk=user_id)
         if user:
-            user.update(unread_count=F('unread_count') + count)
+            UserMessageCounter.objects.filter(pk=user_id).update(unread_count=F('unread_count') + count)
         else:
             user = UserMessageCounter.objects.create(pk=user_id)
-            user.update(unread_count=F('unread_count') + count)
+            UserMessageCounter.objects.filter(pk=user_id).update(unread_count=F('unread_count') + count)
         temp.append((user_id, count))
     return temp
 

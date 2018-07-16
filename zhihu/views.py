@@ -340,7 +340,7 @@ def mark_as_read(user,notificationType=None):
         elif notificationType == 'common':
             rows = raw.filter( Q(msg_type='RF') | Q(msg_type='RQ') \
                             | Q(msg_type='CF') | Q(msg_type='IF') ).update(has_read=True)
-    update_unread_count(user.id, 0-rows)
+    update_unread_count(user.id, 0-rows)  #清除未读消息数量
 
 
 def clean_commonMessages(user,raw_messages):
