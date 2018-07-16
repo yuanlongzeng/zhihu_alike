@@ -261,8 +261,9 @@ djcelery\management\commands\celery.py line 16 注释掉+base.preload_options
 '''
 import djcelery
 djcelery.setup_loader()
-BROKER_URL= 'redis://123456@192.168.200.127:6379/0'
-CELERY_RESULT_BACKEND = 'redis://123456@192.168.200.127:6379/0'
+#redis这密码格式真奇怪  调试了半天 一直：Connection error: NOAUTH Authentication required
+BROKER_URL= 'redis://:123456@192.168.200.127:6379/0'
+CELERY_RESULT_BACKEND = 'redis://:123456@192.168.200.127:6379/0'
 
 # 这样就不用delay了
 CELERY_ALWAYS_EAGER = True

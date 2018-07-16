@@ -1,6 +1,6 @@
 from celery import shared_task, task
 from django_redis import get_redis_connection
-from .models import UserMessageCounter, RK_NOTIFICATIONS_COUNTER
+from zhihu.models import UserMessageCounter, RK_NOTIFICATIONS_COUNTER
 from django.db.models import F
 
 
