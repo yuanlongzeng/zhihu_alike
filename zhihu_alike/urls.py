@@ -18,17 +18,20 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from django.views.static import serve
 
-from rest_framework.routers import DefaultRouter
+from rest_framework.routers import DefaultRouter,SimpleRouter
 
 from zhihu.views import Index, Login, Logout, AnswerListViewSet, QuestionListViewSet, CommentViewSet, TopicViewSet, \
  RegisterView, usertest, userfloatbox, MsgListView, UserDetailView
 from zhihu import genericview
 import xadmin
+from zhihu.views_drf import UserProfileViewSet
+
 router = DefaultRouter()
 router.register(r'answer', AnswerListViewSet) #, base_name="answer"
 router.register(r'question', QuestionListViewSet)
 router.register(r'comment', CommentViewSet)
 router.register(r'topic', TopicViewSet)
+router.register(r'users', UserProfileViewSet,base_name="users")  #定义了get_queryset就要定义base_name
 urlpatterns = [
    url(r'^admin/', admin.site.urls),
 
@@ -42,8 +45,8 @@ urlpatterns = [
     url(r'^logout/$',Logout.as_view(),name="logout"),
     url(r'^register/$',RegisterView.as_view(),name="register"),
 
-    url(r'^usertest/',usertest,name='usertest'),
-    url(r'^userfloatbox/',userfloatbox.as_view(),name='userfloatbox'),
+    url(r'^usertest/$',usertest,name='usertest'),
+    url(r'^userfloatbox/$',userfloatbox.as_view(),name='userfloatbox'),
     url(r'^userfollow/(?P<userid>.*)$',genericview.FollowUserView.as_view(),name='userfollow'),
 
     url(r'^userdetail/(?P<userid>.*)$',UserDetailView.as_view(),name='user_detail'),
