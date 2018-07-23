@@ -1,6 +1,10 @@
+from datetime import datetime,timedelta
+
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
+
 from .models import Answer, Question, Comment, Topic
 
 
@@ -62,3 +66,63 @@ class UserProfileSerializer(serializers.ModelSerializer):
     #     request = self.context['request']
     #     return reverse('user-detail', kwargs={'pk': obj.pk},
     #                    request=request)
+class VerifyCode:
+    pass
+class UserRegisterSerializer(serializers.ModelSerializer):
+
+    """
+    用户注册序列化
+    """
+
+    mobile = serializers.CharField(
+            label="手机号", required=True, allow_blank=False,
+            validators=[UniqueValidator(queryset=User.objects.all(),
+                                        message="手机号已注册")])
+
+    code = serializers.CharField(required=True, write_only=True, max_length=4,
+                                 min_length=4, label="验证码", error_messages={
+                                    "blank": "请输入验证码",
+                                    "required": "请输入验证码",
+                                    "max_length": "验证码格式错误",
+                                    "min_length": "验证码格式错误"
+                                 })
+    username = serializers.CharField(
+            label="用户名", required=True, allow_blank=False,
+            validators=[UniqueValidator(queryset=User.objects.all(),
+                                        message="用户名已存在")])
+    password = serializers.CharField(
+            min_length=6, label="密码", write_only=True,
+            style={'input_type': 'password'},
+            error_messages={
+                "min_length": "密码最少为6位"
+            }
+            )
+
+    def validate_code(self, code):
+        verify_records = VerifyCode.objects.filter(
+                mobile=self.initial_data["mobile"]
+            ).order_by("-created")
+        if verify_records:
+            last_record = verify_records[0]
+            five_mintes_ago = datetime.now() - timedelta(hours=0, minutes=5,
+                                                                  seconds=0)
+            if five_mintes_ago > last_record.created:
+                raise serializers.ValidationError("验证码已过期")
+            if last_record.code != code:
+                raise serializers.ValidationError("验证码错误")
+        else:
+            raise serializers.ValidationError("验证码错误")
+
+    def validate(self, attrs):
+        del attrs["code"]
+        return attrs
+
+    def create(self, validated_data):
+        user = super(UserRegisterSerializer, self).create(validated_data=validated_data)
+        user.set_password(validated_data["password"])  # AbstractBaseUser方法，调用的make_pasword
+        user.save()
+        return user
+
+    class Meta:
+        model = User
+        fields = ("mobile", "code", "username", "password")
