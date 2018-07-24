@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 import os,sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+import datetime
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 #添加自定义sys路径
 sys.path.insert(0,os.path.join(BASE_DIR,"extra_apps"))
@@ -159,7 +161,7 @@ AUTHENTICATION_BACKENDS = (
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ORIGIN_WHITELIST = (
-    '*'
+    '*',
 )
 
 CORS_ALLOW_METHODS = (
@@ -271,3 +273,27 @@ CELERY_ALWAYS_EAGER = True
 CELERY_IMPORTS = ('zhihu.tasks',)
 #存储定期任务
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+
+# JWT config
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        "rest_framework_jwt.authentication.JSONWebTokenAuthentication",
+    )
+}
+
+
+def jwt_response_payload_handler(token, user=None, request=None):
+    data = {
+        "token": token,
+        "username": user.username,
+    }
+    return data
+
+
+JWT_AUTH = {
+    'JWT_RESPONSE_PAYLOAD_HANDLER': jwt_response_payload_handler,
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
+    'JWT_AUTH_HEADER_PREFIX': 'JWT',
+}

@@ -19,6 +19,7 @@ from django.contrib import admin
 from django.views.static import serve
 
 from rest_framework.routers import DefaultRouter,SimpleRouter
+from rest_framework_jwt.views import obtain_jwt_token
 
 from zhihu.views import Index, Login, Logout, AnswerListViewSet, QuestionListViewSet, CommentViewSet, TopicViewSet, \
  RegisterView, usertest, userfloatbox, MsgListView, UserDetailView
@@ -93,6 +94,9 @@ urlpatterns = [
 
     # url(r'^websocket/(?P<userid>.*)$',genericview.WS.as_view(),name='ws'),
 
-
-
+    #jwt
+    # post请求（登录发送用户、密码数据）：首先在序列化类JSONWebTokenSerializer中验证用户名密码，并生成token ，
+    # 如果设置了JWT_AUTH_COOKIE=Tru就将信息存储在cookie中一块返回给用户  否则只返回token和用户名
+    #在前后端分离项目中，拿到这两个信息后就可以在前端设置在cookie中 访问的时候就可以使用JSONWebTokenAuthentication进行验证用户信息
+    url(r'^api-token-auth/', obtain_jwt_token),
 ]
