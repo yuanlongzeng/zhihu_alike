@@ -17,6 +17,7 @@ from django.conf import settings
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.views.static import serve
+from rest_framework.authtoken.views import obtain_auth_token
 
 from rest_framework.routers import DefaultRouter,SimpleRouter
 from rest_framework_jwt.views import obtain_jwt_token
@@ -25,13 +26,14 @@ from zhihu.views import Index, Login, Logout, AnswerListViewSet, QuestionListVie
  RegisterView, usertest, userfloatbox, MsgListView, UserDetailView
 from zhihu import genericview
 import xadmin
-from zhihu.views_drf import UserProfileViewSet
+from zhihu.views_drf import UserProfileViewSet,UserFavViewSet
 
 router = DefaultRouter()
 router.register(r'answer', AnswerListViewSet) #, base_name="answer"
 router.register(r'question', QuestionListViewSet)
 router.register(r'comment', CommentViewSet)
 router.register(r'topic', TopicViewSet)
+router.register(r'collections', UserFavViewSet,base_name="cpllections")
 router.register(r'users', UserProfileViewSet,base_name="users")  #定义了get_queryset就要定义base_name
 urlpatterns = [
    url(r'^admin/', admin.site.urls),
@@ -99,4 +101,7 @@ urlpatterns = [
     # 如果设置了JWT_AUTH_COOKIE=Tru就将信息存储在cookie中一块返回给用户  否则只返回token和用户名
     #在前后端分离项目中，拿到这两个信息后就可以在前端设置在cookie中 访问的时候就可以使用JSONWebTokenAuthentication进行验证用户信息
     url(r'^api-token-auth/', obtain_jwt_token),
+
+    # DRF 自带的登录验证
+    # url('api-token-auth/', obtain_auth_token),
 ]

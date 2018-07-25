@@ -5,7 +5,7 @@ from django.urls import reverse
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from .models import Answer, Question, Comment, Topic
+from .models import Answer, Question, Comment, Topic, UserProfile
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -126,3 +126,23 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("mobile", "code", "username", "password")
+
+class UserFavSerializer(serializers.ModelSerializer):
+
+    """
+    User Fav Serializer
+    """
+
+    # question_id = serializers.CharField(source="answer.question.id", read_only=True)
+    # question_title = serializers.CharField(source="answer.question.title", read_only=True)
+    # answer_vote = serializers.CharField(source="answer.vote", read_only=True)
+    # answer_text = serializers.CharField(source="answer.text", read_only=True)
+    # author_name = serializers.CharField(source="answer.author", read_only=True)
+    # user = serializers.HiddenField(
+    #     default=serializers.CurrentUserDefault()
+    # )
+
+    class Meta:
+        model = UserProfile
+        fields = ("collections","id")#"__all__"
+        depth = 1

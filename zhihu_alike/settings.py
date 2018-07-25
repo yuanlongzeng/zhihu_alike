@@ -279,7 +279,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-        "rest_framework_jwt.authentication.JSONWebTokenAuthentication",
+        "rest_framework_jwt.authentication.JSONWebTokenAuthentication",  #解析token，验证用户  请求时带着头：Authorization:JWT token
     )
 }
 
@@ -295,5 +295,5 @@ def jwt_response_payload_handler(token, user=None, request=None):
 JWT_AUTH = {
     'JWT_RESPONSE_PAYLOAD_HANDLER': jwt_response_payload_handler,
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
-    'JWT_AUTH_HEADER_PREFIX': 'JWT',
+    'JWT_AUTH_HEADER_PREFIX': 'JWT',  #请求头的
 }

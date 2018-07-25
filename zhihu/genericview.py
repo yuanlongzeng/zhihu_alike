@@ -210,6 +210,7 @@ def vote_down(request, pk):
     return JsonResponse(data, status=201)
 
 #评论列表
+
 class CommentsListView(generic.ListView):
     template_name = 'commentslist.html'
     model = Comment

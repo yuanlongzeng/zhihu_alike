@@ -1,10 +1,13 @@
 from django.contrib.auth import get_user_model
 from rest_framework import mixins, viewsets, status
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.response import Response
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_jwt.serializers import jwt_payload_handler, jwt_encode_handler
 
-from zhihu.serializer import UserProfileSerializer, UserRegisterSerializer
+from zhihu.models import UserProfile
+from zhihu.serializer import UserProfileSerializer, UserRegisterSerializer, UserFavSerializer
 
 User = get_user_model()
 
@@ -51,3 +54,18 @@ class UserRegisterViewset(mixins.CreateModelMixin, mixins.UpdateModelMixin, mixi
 
     def perform_create(self, serializer):
         return serializer.save()
+
+class UserFavViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
+                     mixins.CreateModelMixin, mixins.DestroyModelMixin,
+                     viewsets.GenericViewSet):
+
+    """
+    用户收藏回答
+    """
+
+    authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
+    serializer_class = UserFavSerializer
+    # lookup_field = "answer"
+
+    def get_queryset(self):
+        return UserProfile.objects.filter(id=self.request.user.id)
