@@ -132,7 +132,7 @@ class UserFavSerializer(serializers.ModelSerializer):
     """
     User Fav Serializer
     """
-
+    # 从其他模型取额外的必要字段 而不用depth取一些不必要的信息
     # question_id = serializers.CharField(source="answer.question.id", read_only=True)
     # question_title = serializers.CharField(source="answer.question.title", read_only=True)
     # answer_vote = serializers.CharField(source="answer.vote", read_only=True)
@@ -146,3 +146,20 @@ class UserFavSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = ("collections","id")#"__all__"
         depth = 1
+
+class UserFlowQuestionSerializer(serializers.ModelSerializer):
+
+    """
+    User Flow Question Serializer
+    """
+
+    # user = serializers.HiddenField(
+    #     default=serializers.CurrentUserDefault()
+    # )  隐藏字段
+
+    class Meta:
+        model = UserProfile
+        fields = ('id', 'follow_questions')
+
+    def create(self, validated_data):
+        ModelClass = self.Meta.model

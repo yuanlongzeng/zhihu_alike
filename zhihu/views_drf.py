@@ -7,7 +7,8 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_jwt.serializers import jwt_payload_handler, jwt_encode_handler
 
 from zhihu.models import UserProfile
-from zhihu.serializer import UserProfileSerializer, UserRegisterSerializer, UserFavSerializer
+from zhihu.serializer import UserProfileSerializer, UserRegisterSerializer, UserFavSerializer, \
+    UserFlowQuestionSerializer
 
 User = get_user_model()
 
@@ -63,9 +64,34 @@ class UserFavViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
     用户收藏回答
     """
 
-    authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
+    authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication) #JSONWebTokenAuthentication-- JWT验证  SessionAuthentication --session验证
     serializer_class = UserFavSerializer
     # lookup_field = "answer"
 
     def get_queryset(self):
         return UserProfile.objects.filter(id=self.request.user.id)
+
+class UserFlowQuestionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
+                              mixins.CreateModelMixin, mixins.DestroyModelMixin,
+                              viewsets.GenericViewSet):
+
+    """
+    用户关注问题
+    """
+
+    serializer_class = UserFlowQuestionSerializer
+    authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
+    lookup_field = "question"
+
+    def get_queryset(self):
+        return UserProfile.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        instance = serializer.save()  #获取序列化后的数据 同时会调用create将获取的数据存储
+        question = instance.question
+        question.flow()
+
+    def perform_destroy(self, instance):
+        question = instance.question
+        question.cancel_flow()
+        question.delete()
