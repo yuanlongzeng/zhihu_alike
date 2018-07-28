@@ -84,14 +84,23 @@ class UserFlowQuestionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
     lookup_field = "question"
 
     def get_queryset(self):
-        return UserProfile.objects.filter(user=self.request.user)
+        return UserProfile.objects.filter(id=self.request.user.id)
+    # def create(self, request, *args, **kwargs):
+    #     serializer = self.get_serializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     self.perform_create(serializer)
+    #     headers = self.get_success_headers(serializer.data)
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-    def perform_create(self, serializer):
-        instance = serializer.save()  #获取序列化后的数据 同时会调用create将获取的数据存储
-        question = instance.question
-        question.flow()
+    def perform_create(self, serializer): #post
+        follow_questions = serializer.data.get("follow_questions")
+        user = self.request.user
+        user.follow_questions.extend(follow_questions)
+        #再更新原问题的收藏数  通知关注人员等操作  这样很不rest  自己额外编码过多  应该拆分  使用外键关联--many2mnay也是分成两个库存储的
+        #instance = serializer.save()  #获取序列化后的数据 同时会调用create/update将获取的数据存储\更新  在这里不用新建---》不符合rest啊  不能放在一块
 
-    def perform_destroy(self, instance):
+
+    def perform_destroy(self, instance): #delete
         question = instance.question
         question.cancel_flow()
         question.delete()

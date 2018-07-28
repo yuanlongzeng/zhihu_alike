@@ -160,6 +160,3 @@ class UserFlowQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ('id', 'follow_questions')
-
-    def create(self, validated_data):
-        ModelClass = self.Meta.model

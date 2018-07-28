@@ -26,15 +26,16 @@ from zhihu.views import Index, Login, Logout, AnswerListViewSet, QuestionListVie
  RegisterView, usertest, userfloatbox, MsgListView, UserDetailView
 from zhihu import genericview
 import xadmin
-from zhihu.views_drf import UserProfileViewSet,UserFavViewSet
+from zhihu.views_drf import UserProfileViewSet,UserFavViewSet,UserFlowQuestionViewSet
 
 router = DefaultRouter()
 router.register(r'answer', AnswerListViewSet) #, base_name="answer"
 router.register(r'question', QuestionListViewSet)
 router.register(r'comment', CommentViewSet)
 router.register(r'topic', TopicViewSet)
-router.register(r'collections', UserFavViewSet,base_name="cpllections")
+router.register(r'collections', UserFavViewSet,base_name="collections")
 router.register(r'users', UserProfileViewSet,base_name="users")  #定义了get_queryset就要定义base_name
+router.register(r'followquestion', UserFlowQuestionViewSet,base_name="followquestion")
 urlpatterns = [
    url(r'^admin/', admin.site.urls),
 
