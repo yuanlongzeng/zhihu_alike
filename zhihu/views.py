@@ -20,7 +20,9 @@ from rest_framework import filters
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
+from django_filters.rest_framework import DjangoFilterBackend
 
+from zhihu.filters import AnswerFilter
 from zhihu.models import UserProfile, Comment, Topic, Message, update_unread_count
 from .forms import LoginForm, RegisterForm
 
@@ -136,6 +138,9 @@ class AnswerListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,mixins.
     queryset = Answer.objects.all()
     serializer_class = AnswerSerializer
     pagination_class = AnswerPagination
+    filter_backends = (DjangoFilterBackend,)
+    #filter_fields = ["content","votesup"] #精准匹配才行
+    filter_class = AnswerFilter  #自定义过滤类
     #authentication_classes = (TokenAuthentication, )
     #filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
     #filter_class = AnswerFilter

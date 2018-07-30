@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'social_django',
     'djcelery',
     'zhihu',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
