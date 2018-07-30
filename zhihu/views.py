@@ -138,9 +138,13 @@ class AnswerListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,mixins.
     queryset = Answer.objects.all()
     serializer_class = AnswerSerializer
     pagination_class = AnswerPagination
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend,filters.SearchFilter,filters.OrderingFilter)
     #filter_fields = ["content","votesup"] #精准匹配才行
     filter_class = AnswerFilter  #自定义过滤类
+    #drf中的过滤
+    #搜索：其中一个满足条件即可
+    search_fields = ("content","question__title") #搜索 可自定义每个字段的搜索方式：^ = @ $:开头 精确 全文（需数据库支持）  正则 等匹配字段  怎么跨表"question__title"？
+    order_fields = ("votesup","unvotes")  #排序字段
     #authentication_classes = (TokenAuthentication, )
     #filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
     #filter_class = AnswerFilter
