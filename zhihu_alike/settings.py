@@ -280,6 +280,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
+        #一般不能放这作为全局配置 如果token过期的话 不需要验证的页面就不能访问了--放在需要验证的类中
         "rest_framework_jwt.authentication.JSONWebTokenAuthentication",  #解析token，验证用户  请求时带着头：Authorization:JWT token
     )
 }

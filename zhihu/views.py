@@ -12,6 +12,7 @@ from django.shortcuts import render, redirect
 # Create your views here.
 from django.urls import reverse
 from django.views.generic.base import View
+from rest_framework.permissions import IsAuthenticated
 
 from rest_framework.response import Response
 from rest_framework import mixins, status
@@ -25,7 +26,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from zhihu.filters import AnswerFilter
 from zhihu.models import UserProfile, Comment, Topic, Message, update_unread_count
 from .forms import LoginForm, RegisterForm
-
+from .permissions import IsOwnerOrReadOnly
 
 class Index(View):
     def get(self,request):
@@ -145,6 +146,10 @@ class AnswerListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,mixins.
     #搜索：其中一个满足条件即可
     search_fields = ("content","question__title") #搜索 可自定义每个字段的搜索方式：^ = @ $:开头 精确 全文（需数据库支持）  正则 等匹配字段  怎么跨表"question__title"？
     order_fields = ("votesup","unvotes")  #排序字段
+
+    #权限验证 登录验证（这样就不会报错而是返回提示信息）、对象权限验证（是否是数据记录着本人，不是会报404错误）
+    permission_classes = (IsAuthenticated,IsOwnerOrReadOnly)
+
     #authentication_classes = (TokenAuthentication, )
     #filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
     #filter_class = AnswerFilter
@@ -157,7 +162,8 @@ class AnswerListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,mixins.
     #     # instance.save()
     #     serializer = self.get_serializer(instance)
     #     return Response(serializer.data)
-
+    def get_queryset(self):
+        return Answer.objects.filter(user=self.request.user)
     def get_serializer_class(self):
         '''
         不能共用一个序列化类，depth，信息也要一块传递
