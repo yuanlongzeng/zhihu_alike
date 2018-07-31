@@ -96,6 +96,7 @@ class UserFlowQuestionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
         follow_questions = serializer.data.get("follow_questions")
         user = self.request.user
         user.follow_questions.extend(follow_questions)
+        user.save()   # m2m model拆分成两个表 这样创建操作 就不用自己编码  同时也能使用信号做一些更新操作 如增加答案的收藏数
         #再更新原问题的收藏数  通知关注人员等操作  这样很不rest  自己额外编码过多  应该拆分  使用外键关联--many2mnay也是分成两个库存储的
         #instance = serializer.save()  #获取序列化后的数据 同时会调用create/update将获取的数据存储\更新  在这里不用新建---》不符合rest啊  不能放在一块
 
