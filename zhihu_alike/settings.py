@@ -299,3 +299,8 @@ JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
     'JWT_AUTH_HEADER_PREFIX': 'JWT',  #请求头的
 }
+
+#drf_extensions
+REST_FRAMEWORK_EXTENSIONS = {
+"DEFAULT_CACHE_RESPONSE_TIMEOUT":5
+}

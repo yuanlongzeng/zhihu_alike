@@ -22,11 +22,13 @@ from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework_extensions.cache.mixins import CacheResponseMixin  #对retrieve  list进行缓存(最好是所有人都能看到的才进行缓存
 
 from zhihu.filters import AnswerFilter
 from zhihu.models import UserProfile, Comment, Topic, Message, update_unread_count
 from .forms import LoginForm, RegisterForm
 from .permissions import IsOwnerOrReadOnly
+
 
 class Index(View):
     def get(self,request):
@@ -131,7 +133,7 @@ class AnswerPagination(PageNumberPagination):
     max_page_size = 100
 
 
-class AnswerListViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,mixins.CreateModelMixin,mixins.UpdateModelMixin, mixins.DestroyModelMixin,viewsets.GenericViewSet):
+class AnswerListViewSet(CacheResponseMixin,mixins.ListModelMixin, mixins.RetrieveModelMixin,mixins.CreateModelMixin,mixins.UpdateModelMixin, mixins.DestroyModelMixin,viewsets.GenericViewSet):
     """
     Answer列表页
     """
