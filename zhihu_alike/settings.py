@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'djcelery',
     'zhihu',
     'django_filters',
+    'raven.contrib.django.raven_compat',
 ]
 
 MIDDLEWARE = [
@@ -303,4 +304,12 @@ JWT_AUTH = {
 #drf_extensions
 REST_FRAMEWORK_EXTENSIONS = {
 "DEFAULT_CACHE_RESPONSE_TIMEOUT":5
+}
+
+# sentry
+RAVEN_CONFIG = {
+    'dsn': 'https://<key>:<secret>@sentry.io/<project>',
+    # If you are using git, you can also automatically configure the
+    # release based on the git info.
+   # 'release': raven.fetch_git_sha(os.path.abspath(os.pardir)),
 }
