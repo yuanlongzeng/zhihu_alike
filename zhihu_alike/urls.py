@@ -106,3 +106,8 @@ urlpatterns = [
     # DRF 自带的登录验证
     # url('api-token-auth/', obtain_auth_token),
 ]
+if settings.DEBUG:
+   import debug_toolbar
+   urlpatterns = [
+   url(r'^debug/', include(debug_toolbar.urls)),
+   ] + urlpatterns
