@@ -133,7 +133,8 @@ class AnswerPagination(PageNumberPagination):
     max_page_size = 100
 
 
-class AnswerListViewSet(CacheResponseMixin,mixins.ListModelMixin, mixins.RetrieveModelMixin,mixins.CreateModelMixin,mixins.UpdateModelMixin, mixins.DestroyModelMixin,viewsets.GenericViewSet):
+class AnswerListViewSet(CacheResponseMixin,mixins.ListModelMixin, mixins.RetrieveModelMixin,mixins.CreateModelMixin,mixins.UpdateModelMixin,
+                        mixins.DestroyModelMixin,viewsets.GenericViewSet):
     """
     Answer列表页
     """

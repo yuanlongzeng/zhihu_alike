@@ -310,7 +310,7 @@ REST_FRAMEWORK_EXTENSIONS = {
 
 # sentry
 RAVEN_CONFIG = {
-    'dsn': 'https://<key>:<secret>@sentry.io/<project>',
+    'dsn': 'http://ead56ac79418478aacf43b261e123f7d:b31ed00258354073b1b0ea2101cf1ac2@192.168.200.129:9000//2',
     # If you are using git, you can also automatically configure the
     # release based on the git info.
    # 'release': raven.fetch_git_sha(os.path.abspath(os.pardir)),

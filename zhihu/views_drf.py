@@ -100,6 +100,12 @@ class UserFlowQuestionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
         #再更新原问题的收藏数  通知关注人员等操作  这样很不rest  自己额外编码过多  应该拆分  使用外键关联--many2mnay也是分成两个库存储的
         #instance = serializer.save()  #获取序列化后的数据 同时会调用create/update将获取的数据存储\更新  在这里不用新建---》不符合rest啊  不能放在一块
 
+    #有时只需获取部份信息用于其他操作，此时可以重写save函数
+    # def save(self):
+    #     email = self.validated_data['email']
+    #     message = self.validated_data['message']
+    #     send_email(from=email, message = message)
+
 
     def perform_destroy(self, instance): #delete
         question = instance.question
