@@ -269,6 +269,14 @@ import djcelery
 djcelery.setup_loader()
 #redis这密码格式真奇怪  调试了半天 一直：Connection error: NOAUTH Authentication required
 BROKER_URL= 'redis://:123456@192.168.200.127:6379/0'
+#rabbitmq作为djcelery的后端
+#使用docker安装详见：https://github.com/yuanlongzeng/my-summary/blob/master/docker.md#%E5%AE%89%E8%A3%85rabbitmq
+# BROKER_HOST = "192.168.200.129"
+# BROKER_PORT = 5672
+# BROKER_USER = "guest"
+# BROKER_PASSWORD = "guest"
+# BROKER_VHOST = "/"  #rabbitmq的虚拟主机，vhost去做第一层的区分，虚拟主机，工作组等，它默认是/
+
 CELERY_RESULT_BACKEND = 'redis://:123456@192.168.200.127:6379/0'
 
 # 这样就不用delay了
