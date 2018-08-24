@@ -1,5 +1,10 @@
 ##########################
 # Jetbrains Ignore files #
 ##########################
+*.pyc
 *.iml
-.idea/
+db.sqlite3
+
+.idea
+__pycache__
+migrations
